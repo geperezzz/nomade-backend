@@ -1,0 +1,349 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id              String   @id @default(uuid()) @db.Uuid
+  firstName       String
+  lastName        String
+  address         String
+  dni             String
+  birthdate       DateTime @db.Date
+  citizenship     String
+  phoneNumber     String
+  email           String
+  requestedOrders Order[]
+  isDeleted       Boolean  @default(false)
+}
+
+model Employee {
+  id          String               @id @default(uuid()) @db.Uuid
+  firstName   String
+  lastName    String
+  occupations EmployeeOccupation[]
+  address     String
+  dni         String
+  birthdate   DateTime             @db.Date
+  citizenship String
+  phoneNumber String
+  email       String
+  salary      Decimal
+  isDeleted   Boolean              @default(false)
+  asSalesman  Salesman?
+}
+
+enum EmployeeOccupation {
+  SUPER_ADMIN
+  ADMIN
+  SALESMAN
+}
+
+model Salesman {
+  asEmployee   Employee @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id           String   @id @db.Uuid
+  placedOrders Order[]
+}
+
+model Order {
+  id                 String         @id @default(uuid()) @db.Uuid
+  orderedPackages    OrderPackage[]
+  orderedServices    OrderService[]
+  price              Decimal        @default(0)
+  payments           Payment[]
+  customer           Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  customerId         String         @db.Uuid
+  salesman           Salesman       @relation(fields: [salesmanId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  salesmanId         String         @db.Uuid
+  placementTimestamp DateTime       @default(now())
+}
+
+model OrderPackage {
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId       String          @db.Uuid
+  package       PackageSnapshot @relation(fields: [packageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  packageId     String          @db.Uuid
+  amountOrdered Int
+
+  @@id([orderId, packageId])
+}
+
+model OrderService {
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId       String          @db.Uuid
+  service       ServiceSnapshot @relation(fields: [serviceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  serviceId     String          @db.Uuid
+  amountOrdered Int
+
+  @@id([orderId, serviceId])
+}
+
+model Payment {
+  order                       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId                     String        @db.Uuid
+  paymentNumber               Int           @default(autoincrement())
+  paymentTimestamp            DateTime
+  netAmountPaid               Decimal
+  amountWithCommissionPaid    Decimal       @default(0)
+  appliedCommissionPercentage Decimal
+  paymentMethod               PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethodId             String        @db.Uuid
+
+  @@id([orderId, paymentNumber])
+}
+
+model PaymentMethod {
+  id                    String    @id @default(uuid()) @db.Uuid
+  name                  String
+  commissionPercentage  Int
+  paymentsDoneUsingThis Payment[]
+}
+
+model Package {
+  id                  String            @id @default(uuid()) @db.Uuid
+  lastUpdateTimestamp DateTime          @default(now())
+  name                String
+  description         String
+  price               Decimal           @default(0)
+  appliedDiscount     Decimal
+  copies              PackageSnapshot[]
+  containedServices   PackageService[]
+}
+
+model PackageService {
+  package         Package @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  packageId       String  @db.Uuid
+  service         Service @relation(fields: [serviceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  serviceId       String  @db.Uuid
+  amountContained Int
+
+  @@id([packageId, serviceId])
+}
+
+model Service {
+  id                     String            @id @default(uuid()) @db.Uuid
+  lastUpdateTimestamp    DateTime          @default(now())
+  name                   String
+  description            String
+  serviceLocation        String
+  price                  Decimal
+  serviceTimestamp       DateTime
+  serviceType            ServiceType
+  asHotelPerNight        HotelPerNight?
+  asCarRental            CarRental?
+  asBusTicket            BusTicket?
+  asAirlineTicket        AirlineTicket?
+  asTrainTicket          TrainTicket?
+  asTour                 Tour?
+  asEvent                Event?
+  copies                 ServiceSnapshot[]
+  packagesContainingThis PackageService[]
+}
+
+enum ServiceType {
+  HOTEL_PER_NIGHT
+  CAR_RENTAL
+  BUS_TICKET
+  AIRLINE_TICKET
+  TRAIN_TICKET
+  TOUR
+  EVENT
+}
+
+model HotelPerNight {
+  asService                    Service  @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                           String   @id @default(uuid()) @db.Uuid
+  numberOfNights               Int
+  numberOfStars                Int
+  numberOfRooms                Int
+  allowedNumberOfPeoplePerRoom Int
+  checkoutTimestamp            DateTime
+}
+
+model CarRental {
+  asService             Service       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                    String        @id @default(uuid()) @db.Uuid
+  carReturnTimestamp    DateTime
+  carBrand              String
+  carModel              String
+  numberOfSeatsInTheCar Int
+  carEngineType         CarEngineType
+}
+
+enum CarEngineType {
+  GASOLINE
+  NATURAL_GAS
+  DIESEL
+  ELECTRIC
+}
+
+model BusTicket {
+  asService           Service     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                  String      @id @default(uuid()) @db.Uuid
+  arrivalLocation     String
+  arrivalTimestamp    DateTime
+  assignedBusSeat     String
+  busSeatType         BusSeatType
+  busOperatingCompany String
+}
+
+enum BusSeatType {
+  STANDARD
+  SEMI_BED
+  BED_EXECUTIVE
+  BED_SUITE
+}
+
+model AirlineTicket {
+  asService         Service           @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                String            @id @default(uuid()) @db.Uuid
+  arrivalLocation   String
+  arrivalTimestamp  DateTime
+  airline           String
+  assignedCabinType AirplaneCabinType
+}
+
+enum AirplaneCabinType {
+  ECONOMY
+  BUSINESS
+}
+
+model TrainTicket {
+  asService             Service        @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                    String         @id @default(uuid()) @db.Uuid
+  arrivalLocation       String
+  arrivalTimestamp      String
+  trainOperatingCompany String
+  assignedCabinType     TrainCabinType
+}
+
+enum TrainCabinType {
+  ECONOMY
+  BUSINESS
+}
+
+model Tour {
+  asService        Service @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id               String  @id @default(uuid()) @db.Uuid
+  tourType         String
+  durationInterval String
+}
+
+model Event {
+  asService        Service @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id               String  @id @default(uuid()) @db.Uuid
+  eventType        String
+  durationInterval String
+}
+
+model PackageSnapshot {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  snapshotTimestamp    DateTime                 @default(now())
+  originalPackage      Package?                 @relation(fields: [originalPackageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  originalPackageId    String?                  @db.Uuid
+  name                 String
+  description          String
+  price                Decimal
+  appliedDiscount      Decimal
+  containedServices    PackageSnapshotService[]
+  ordersContainingThis OrderPackage[]
+}
+
+model PackageSnapshotService {
+  package         PackageSnapshot @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  packageId       String          @db.Uuid
+  service         ServiceSnapshot @relation(fields: [serviceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  serviceId       String          @db.Uuid
+  amountContained Int
+
+  @@id([packageId, serviceId])
+}
+
+model ServiceSnapshot {
+  id                     String                   @id @default(uuid()) @db.Uuid
+  snapshotTimestamp      DateTime                 @default(now())
+  originalService        Service?                 @relation(fields: [originalServiceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  originalServiceId      String?                  @db.Uuid
+  name                   String
+  description            String
+  serviceLocation        String
+  price                  Decimal
+  serviceTimestamp       DateTime
+  serviceType            ServiceType
+  asHotelPerNight        HotelPerNightSnapshot?
+  asCarRental            CarRentalSnapshot?
+  asBusTicket            BusTicketSnapshot?
+  asAirlineTicket        AirlineTicketSnapshot?
+  asTrainTicket          TrainTicketSnapshot?
+  asTour                 TourSnapshot?
+  asEvent                EventSnapshot?
+  packagesContainingThis PackageSnapshotService[]
+  ordersContainingThis   OrderService[]
+}
+
+model HotelPerNightSnapshot {
+  asService                    ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                           String          @id @default(uuid()) @db.Uuid
+  numberOfNights               Int
+  numberOfStars                Int
+  numberOfRooms                Int
+  allowedNumberOfPeoplePerRoom Int
+  checkoutTimestamp            DateTime
+}
+
+model CarRentalSnapshot {
+  asService          ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                 String          @id @default(uuid()) @db.Uuid
+  carReturnTimestamp DateTime
+  carBrand           String
+  carModel           String
+  numberOfCarSeats   Int
+  carEngineType      CarEngineType
+}
+
+model BusTicketSnapshot {
+  asService           ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                  String          @id @default(uuid()) @db.Uuid
+  arrivalLocation     String
+  arrivalTimestamp    DateTime
+  assignedBusSeat     String
+  busSeatType         BusSeatType
+  busOperatingCompany String
+}
+
+model AirlineTicketSnapshot {
+  asService         ServiceSnapshot   @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                String            @id @default(uuid()) @db.Uuid
+  arrivalLocation   String
+  arrivalTimestamp  DateTime
+  airline           String
+  assignedCabinType AirplaneCabinType
+  hasStopover       Boolean
+}
+
+model TrainTicketSnapshot {
+  asService             ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                    String          @id @default(uuid()) @db.Uuid
+  arrivalLocation       String
+  arrivalTimestamp      String
+  trainOperatingCompany String
+  assignedCabinType     TrainCabinType
+}
+
+model TourSnapshot {
+  asService        ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id               String          @id @default(uuid()) @db.Uuid
+  tourType         String
+  durationInterval String
+}
+
+model EventSnapshot {
+  asService        ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id               String          @id @default(uuid()) @db.Uuid
+  eventType        String
+  durationInterval String
+}
