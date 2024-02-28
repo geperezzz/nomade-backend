@@ -19,6 +19,8 @@ model Customer {
   email           String
   deletedAt       DateTime?
   requestedOrders Order[]
+
+  @@unique([dni, deletedAt])
 }
 
 model Employee {
@@ -35,6 +37,8 @@ model Employee {
   salary      Decimal
   deletedAt   DateTime?
   asSalesman  Salesman?
+
+  @@unique([dni, deletedAt])
 }
 
 enum EmployeeOccupation {
