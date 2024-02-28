@@ -21,6 +21,7 @@ model Customer {
   requestedOrders Order[]
 
   @@unique([dni, deletedAt])
+  @@unique([email, deletedAt])
 }
 
 model Employee {
@@ -39,6 +40,7 @@ model Employee {
   asSalesman  Salesman?
 
   @@unique([dni, deletedAt])
+  @@unique([email, deletedAt])
 }
 
 enum EmployeeOccupation {
