@@ -28,7 +28,7 @@ export class CustomersService {
     await this.prismaService.$transaction(async (transaction) => {
       items = await transaction.customer.findMany({
         where: {
-          isDeleted: false,
+          deletedAt: null,
         },
         skip: itemsPerPage * (pageIndex - 1),
         take: itemsPerPage,
@@ -36,7 +36,7 @@ export class CustomersService {
 
       itemCount = await transaction.customer.count({
         where: {
-          isDeleted: false,
+          deletedAt: null,
         },
         skip: itemsPerPage * (pageIndex - 1),
         take: itemsPerPage,
@@ -58,7 +58,7 @@ export class CustomersService {
     return await this.prismaService.customer.findUnique({
       where: {
         id,
-        isDeleted: false,
+        deletedAt: null,
       },
     });
   }
@@ -70,7 +70,7 @@ export class CustomersService {
     return await this.prismaService.customer.update({
       where: {
         id,
-        isDeleted: false,
+        deletedAt: null,
       },
       data: updateCustomerDto,
     });
@@ -80,10 +80,10 @@ export class CustomersService {
     return await this.prismaService.customer.update({
       where: {
         id,
-        isDeleted: false,
+        deletedAt: null,
       },
       data: {
-        isDeleted: true,
+        deletedAt: new Date(),
       },
     });
   }
