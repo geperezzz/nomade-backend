@@ -26,8 +26,8 @@ function addSwaggerSupport(
   patchNestJsSwagger();
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Diostatón')
-    .setDescription('The Diostatón API documentation')
+    .setTitle('Nomade')
+    .setDescription('The Nomade API documentation')
     .setVersion(appConfig.get('APP_VERSION', { infer: true }))
     .build();
   const openApiDocument = SwaggerModule.createDocument(app, swaggerConfig);
