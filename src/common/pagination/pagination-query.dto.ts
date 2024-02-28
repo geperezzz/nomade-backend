@@ -6,4 +6,7 @@ export const paginationQuerySchema = z.object({
   'per-page': z.coerce.number().int().min(1),
 });
 
-export class PaginationQueryDto extends createZodDto(paginationQuerySchema) {}
+export class PaginationQueryDto extends createZodDto(paginationQuerySchema) {
+  page: number = super.page;
+  'per-page': number = super['per-page'];
+}
