@@ -6,6 +6,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { validate } from './app.config';
 import { CustomersModule } from 'src/customers/customers.module';
 import { SuccessfulResponseBuilderInterceptor } from 'src/common/successful-response-builder.interceptor';
+import { ServicesModule } from 'src/services/services.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SuccessfulResponseBuilderInterceptor } from 'src/common/successful-resp
       validate,
     }),
     CustomersModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [
