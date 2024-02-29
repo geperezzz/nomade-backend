@@ -39,9 +39,11 @@ export class CustomersController {
   ): Promise<Page<CustomerDto>> {
     const foundCustomersPage =
       await this.customersService.findMany(paginationQueryDto);
-    foundCustomersPage.items.map((customer) => customerSchema.parse(customer));
+    const items = foundCustomersPage.items.map((customer) =>
+      customerSchema.parse(customer),
+    );
 
-    return foundCustomersPage;
+    return { ...foundCustomersPage, items };
   }
 
   @Get(':id')
