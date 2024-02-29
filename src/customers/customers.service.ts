@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { Customer } from '@prisma/client';
 
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.interface';
+import { CustomerEntity } from './entities/customer.entity';
 
 @Injectable()
 export class CustomersService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
+  async create(createCustomerDto: CreateCustomerDto): Promise<CustomerEntity> {
     return await this.prismaService.customer.create({
       data: createCustomerDto,
     });
@@ -19,29 +19,26 @@ export class CustomersService {
 
   async findMany(
     paginationQueryDto: PaginationQueryDto,
-  ): Promise<Page<Customer>> {
+  ): Promise<Page<CustomerEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    let items!: Customer[];
-    let itemCount!: number;
-    await this.prismaService.$transaction(async (transaction) => {
-      items = await transaction.customer.findMany({
+    const [items, itemCount] = await this.prismaService.$transaction([
+      this.prismaService.customer.findMany({
         where: {
           deletedAt: null,
         },
         skip: itemsPerPage * (pageIndex - 1),
         take: itemsPerPage,
-      });
-
-      itemCount = await transaction.customer.count({
+      }),
+      this.prismaService.customer.count({
         where: {
           deletedAt: null,
         },
         skip: itemsPerPage * (pageIndex - 1),
         take: itemsPerPage,
-      });
-    });
+      }),
+    ]);
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
@@ -54,7 +51,7 @@ export class CustomersService {
     };
   }
 
-  async findOne(id: string): Promise<Customer | null> {
+  async findOne(id: string): Promise<CustomerEntity | null> {
     return await this.prismaService.customer.findUnique({
       where: {
         id,
@@ -66,7 +63,7 @@ export class CustomersService {
   async update(
     id: string,
     updateCustomerDto: UpdateCustomerDto,
-  ): Promise<Customer> {
+  ): Promise<CustomerEntity> {
     return await this.prismaService.customer.update({
       where: {
         id,
@@ -76,7 +73,7 @@ export class CustomersService {
     });
   }
 
-  async remove(id: string): Promise<Customer> {
+  async remove(id: string): Promise<CustomerEntity> {
     return await this.prismaService.customer.update({
       where: {
         id,
