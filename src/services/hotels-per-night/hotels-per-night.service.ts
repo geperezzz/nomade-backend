@@ -9,6 +9,7 @@ import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
 import {
   HotelPerNight as HotelPerNightModel,
   Service as ServiceModel,
+  ServiceType,
 } from '@prisma/client';
 
 type HotelPerNightRawEntity = HotelPerNightModel & {
@@ -42,7 +43,7 @@ export class HotelsPerNightService {
         name: createHotelPerNightDto.serviceName,
         description: createHotelPerNightDto.serviceDescription,
         price: createHotelPerNightDto.servicePrice,
-        serviceType: 'HOTEL_PER_NIGHT',
+        serviceType: ServiceType.HOTEL_PER_NIGHT,
       },
     });
 
