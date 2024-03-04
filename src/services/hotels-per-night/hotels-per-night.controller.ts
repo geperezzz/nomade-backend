@@ -15,12 +15,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { HotelsPerNightService } from './hotels-per-night.service';
 import { CreateHotelPerNightDto } from './dtos/create-hotel-per-night.dto';
 import { UpdateHotelPerNightDto } from './dtos/update-hotel-per-night.dto';
-import {
-  hotelPerNightSchema,
-  HotelPerNightDto,
-} from './dtos/hotel-per-night.dto';
+import { HotelPerNightDto } from './dtos/hotel-per-night.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
-import { Page } from 'src/common/pagination/page.interface';
+import { Page } from 'src/common/pagination/page.type';
 
 @Controller('services/hotels-per-night')
 @ApiTags('Hotels per night')
@@ -34,7 +31,7 @@ export class HotelsPerNightController {
     const createdHotelPerNight = await this.hotelsPerNightService.create(
       createHotelPerNightDto,
     );
-    return hotelPerNightSchema.parse(createdHotelPerNight);
+    return HotelPerNightDto.fromEntity(createdHotelPerNight);
   }
 
   @Get()
@@ -43,9 +40,7 @@ export class HotelsPerNightController {
   ): Promise<Page<HotelPerNightDto>> {
     const foundHotelsPerNightPage =
       await this.hotelsPerNightService.findMany(paginationQueryDto);
-    const items = foundHotelsPerNightPage.items.map((hotelPerNight) =>
-      hotelPerNightSchema.parse(hotelPerNight),
-    );
+    const items = foundHotelsPerNightPage.items.map(HotelPerNightDto.fromEntity);
 
     return { ...foundHotelsPerNightPage, items };
   }
@@ -62,7 +57,7 @@ export class HotelsPerNightController {
         `There is no hotel per night service with ID ${id}`,
       );
     }
-    return hotelPerNightSchema.parse(foundHotelPerNight);
+    return HotelPerNightDto.fromEntity(foundHotelPerNight);
   }
 
   @Patch(':id')
@@ -74,7 +69,7 @@ export class HotelsPerNightController {
       id,
       updateHotelPerNightDto,
     );
-    return hotelPerNightSchema.parse(updatedHotelPerNight);
+    return HotelPerNightDto.fromEntity(updatedHotelPerNight);
   }
 
   @Delete(':id')
@@ -82,6 +77,6 @@ export class HotelsPerNightController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<HotelPerNightDto> {
     const removedHotelPerNight = await this.hotelsPerNightService.remove(id);
-    return hotelPerNightSchema.parse(removedHotelPerNight);
+    return HotelPerNightDto.fromEntity(removedHotelPerNight);
   }
 }

@@ -105,19 +105,19 @@ model Payment {
 model PaymentMethod {
   id                    String    @id @default(uuid()) @db.Uuid
   name                  String
-  commissionPercentage  Int
+  commissionPercentage  Decimal
   paymentsDoneUsingThis Payment[]
 }
 
 model Package {
-  id                  String            @id @default(uuid()) @db.Uuid
-  lastUpdateTimestamp DateTime          @default(now())
-  name                String
-  description         String
-  price               Decimal           @default(0)
-  appliedDiscount     Decimal
-  copies              PackageSnapshot[]
-  containedServices   PackageService[]
+  id                        String            @id @default(uuid()) @db.Uuid
+  lastUpdateTimestamp       DateTime          @default(now())
+  name                      String
+  description               String
+  price                     Decimal           @default(0)
+  appliedDiscountPercentage Decimal
+  copies                    PackageSnapshot[]
+  containedServices         PackageService[]
 }
 
 model PackageService {
@@ -133,10 +133,10 @@ model PackageService {
 model Service {
   id                     String            @id @default(uuid()) @db.Uuid
   lastUpdateTimestamp    DateTime          @default(now())
-  name                   String
-  description            String
+  serviceName            String
+  serviceDescription     String
   serviceLocation        String
-  price                  Decimal
+  servicePrice           Decimal
   serviceTimestamp       DateTime
   serviceType            ServiceType
   asHotelPerNight        HotelPerNight?
@@ -274,10 +274,10 @@ model ServiceSnapshot {
   snapshotTimestamp      DateTime                 @default(now())
   originalService        Service?                 @relation(fields: [originalServiceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   originalServiceId      String?                  @db.Uuid
-  name                   String
-  description            String
+  serviceName            String
+  serviceDescription     String
   serviceLocation        String
-  price                  Decimal
+  servicePrice           Decimal
   serviceTimestamp       DateTime
   serviceType            ServiceType
   asHotelPerNight        HotelPerNightSnapshot?

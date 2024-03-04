@@ -4,7 +4,7 @@ import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
-import { Page } from 'src/common/pagination/page.interface';
+import { Page } from 'src/common/pagination/page.type';
 import { CustomerEntity } from './entities/customer.entity';
 
 @Injectable()

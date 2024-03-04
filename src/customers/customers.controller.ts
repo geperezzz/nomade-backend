@@ -15,9 +15,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
-import { customerSchema, CustomerDto } from './dtos/customer.dto';
+import { CustomerDto } from './dtos/customer.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
-import { Page } from 'src/common/pagination/page.interface';
+import { Page } from 'src/common/pagination/page.type';
 
 @Controller('customers')
 @ApiTags('Customers')
@@ -30,7 +30,7 @@ export class CustomersController {
   ): Promise<CustomerDto> {
     const createdCustomer =
       await this.customersService.create(createCustomerDto);
-    return customerSchema.parse(createdCustomer);
+    return CustomerDto.fromEntity(createdCustomer);
   }
 
   @Get()
@@ -39,9 +39,7 @@ export class CustomersController {
   ): Promise<Page<CustomerDto>> {
     const foundCustomersPage =
       await this.customersService.findMany(paginationQueryDto);
-    const items = foundCustomersPage.items.map((customer) =>
-      customerSchema.parse(customer),
-    );
+    const items = foundCustomersPage.items.map(CustomerDto.fromEntity);
 
     return { ...foundCustomersPage, items };
   }
@@ -56,7 +54,7 @@ export class CustomersController {
         `There is no Customer with ID ${id}`,
       );
     }
-    return customerSchema.parse(foundCustomer);
+    return CustomerDto.fromEntity(foundCustomer);
   }
 
   @Patch(':id')
@@ -68,12 +66,12 @@ export class CustomersController {
       id,
       updateCustomerDto,
     );
-    return customerSchema.parse(updatedCustomer);
+    return CustomerDto.fromEntity(updatedCustomer);
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<CustomerDto> {
     const removedCustomer = await this.customersService.remove(id);
-    return customerSchema.parse(removedCustomer);
+    return CustomerDto.fromEntity(removedCustomer);
   }
 }

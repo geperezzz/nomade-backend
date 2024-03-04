@@ -1,63 +1,71 @@
 import { Injectable } from '@nestjs/common';
+import {
+  HotelPerNight as HotelPerNightModel,
+  Service as ServiceModel,
+} from '@prisma/client';
 
 import { CreateHotelPerNightDto } from './dtos/create-hotel-per-night.dto';
 import { UpdateHotelPerNightDto } from './dtos/update-hotel-per-night.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
-import { Page } from 'src/common/pagination/page.interface';
+import { Page } from 'src/common/pagination/page.type';
 import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
-import {
-  HotelPerNight as HotelPerNightModel,
-  Service as ServiceModel,
-  ServiceType,
-} from '@prisma/client';
+import { serviceSchema } from '../dtos/service.dto';
+import { hotelPerNightOnlySchema } from './dtos/hotel-per-night.dto';
+import { ServicesService } from '../services.service';
+import { ServiceType } from '../entities/service.entity';
+
+const selectHotelPerNightEntityFields = {
+  include: {
+    asService: {
+      select: {
+        serviceName: true,
+        serviceDescription: true,
+        serviceLocation: true,
+        servicePrice: true,
+        serviceTimestamp: true,
+      },
+    },
+  },
+} as const;
 
 type HotelPerNightRawEntity = HotelPerNightModel & {
-  asService: ServiceModel;
+  asService: Omit<ServiceModel, 'id' | 'lastUpdateTimestamp' | 'serviceType'>;
 };
 
 function rawEntityToEntity(
   rawHotelPerNight: HotelPerNightRawEntity,
 ): HotelPerNightEntity {
-  const { asService: serviceModel, ...hotelPerNightModel } = rawHotelPerNight;
-  return {
-    serviceName: serviceModel.name,
-    serviceDescription: serviceModel.description,
-    serviceLocation: serviceModel.serviceLocation,
-    servicePrice: serviceModel.price,
-    serviceTimestamp: serviceModel.serviceTimestamp,
-    ...hotelPerNightModel,
-  };
+  const { asService: serviceFields, ...hotelPerNightFields } = rawHotelPerNight;
+  return { ...serviceFields, ...hotelPerNightFields };
 }
 
 @Injectable()
 export class HotelsPerNightService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService, private servicesService: ServicesService) {}
 
   async create(
     createHotelPerNightDto: CreateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
-    const createdService = await this.prismaService.service.create({
-      data: {
-        ...createHotelPerNightDto,
-        name: createHotelPerNightDto.serviceName,
-        description: createHotelPerNightDto.serviceDescription,
-        price: createHotelPerNightDto.servicePrice,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
-      },
-    });
+    return this.prismaService.$transaction(async (transactionClient) => {
+      const createdService = await this.servicesService.create(
+        serviceSchema.parse({
+          ...createHotelPerNightDto,
+          serviceType: ServiceType.HOTEL_PER_NIGHT,
+          transactionClient,
+        }) // strip out the HotelPerNight-specific fields
+      );
 
-    const createdHotelPerNight = await this.prismaService.hotelPerNight.create({
-      data: {
-        ...createHotelPerNightDto,
-        id: createdService.id,
-      },
-      include: {
-        asService: true,
-      },
-    });
+      const createdHotelPerNight = await transactionClient.hotelPerNight.create({
+        data: {
+          ...hotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
+          id: createdService.id,
+        },
+        ...selectHotelPerNightEntityFields,
+      });
 
-    return rawEntityToEntity(createdHotelPerNight);
+      return rawEntityToEntity(createdHotelPerNight);
+    });
   }
 
   async findMany(
@@ -69,9 +77,7 @@ export class HotelsPerNightService {
     const [rawHotelsPerNight, itemCount] =
       await this.prismaService.$transaction([
         this.prismaService.hotelPerNight.findMany({
-          include: {
-            asService: true,
-          },
+          ...selectHotelPerNightEntityFields,
           skip: itemsPerPage * (pageIndex - 1),
           take: itemsPerPage,
         }),
@@ -98,9 +104,7 @@ export class HotelsPerNightService {
       where: {
         id,
       },
-      include: {
-        asService: true,
-      },
+      ...selectHotelPerNightEntityFields,
     });
     return rawHotelPerNight ? rawEntityToEntity(rawHotelPerNight) : null;
   }
@@ -109,16 +113,23 @@ export class HotelsPerNightService {
     id: string,
     updateHotelPerNightDto: UpdateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
-    const updatedHotelPerNight = await this.prismaService.hotelPerNight.update({
-      where: {
+    return this.prismaService.$transaction(async (transactionClient) => {
+      const updatedService = await this.servicesService.update(
         id,
-      },
-      data: updateHotelPerNightDto,
-      include: {
-        asService: true,
-      },
+        serviceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
+        transactionClient,
+      );
+      
+      const updatedHotelPerNight = await this.prismaService.hotelPerNight.update({
+        where: {
+          id: updatedService.id,
+        },
+        data: hotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
+        ...selectHotelPerNightEntityFields,
+      });
+
+      return rawEntityToEntity(updatedHotelPerNight);
     });
-    return rawEntityToEntity(updatedHotelPerNight);
   }
 
   async remove(id: string): Promise<HotelPerNightEntity> {
@@ -126,9 +137,7 @@ export class HotelsPerNightService {
       where: {
         id,
       },
-      include: {
-        asService: true,
-      },
+      ...selectHotelPerNightEntityFields,
     });
     return rawEntityToEntity(removedHotelPerNight);
   }

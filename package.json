@@ -23,6 +23,7 @@
     "@nestjs/schematics": "^10.1.1",
     "@nestjs/swagger": "^7.3.0",
     "@prisma/client": "^5.9.1",
+    "decimal.js": "^10.4.3",
     "nestjs-zod": "^3.0.0",
     "prisma": "^5.10.2",
     "reflect-metadata": "^0.2.0",

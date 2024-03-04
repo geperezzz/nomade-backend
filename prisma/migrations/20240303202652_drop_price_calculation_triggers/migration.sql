@@ -1,0 +1,29 @@
+DROP TRIGGER update_package_price_after_inserting_or_deleting_package_services ON "PackageService";
+
+DROP TRIGGER update_package_price_after_updating_amount_of_services_contained ON "PackageService";
+
+DROP TRIGGER update_package_price_after_updating_service_price ON "Service";
+
+DROP TRIGGER update_package_price_after_updating_applied_discount ON "Package";
+
+DROP TRIGGER update_package_snapshot_price_after_inserting_or_deleting_package_snapshot_services ON "PackageSnapshotService";
+
+DROP TRIGGER update_package_snapshot_price_after_updating_amount_of_service_copies_contained ON "PackageSnapshotService";
+
+DROP TRIGGER update_package_snapshot_price_after_updating_service_snapshot_price ON "ServiceSnapshot";
+
+DROP TRIGGER update_package_snapshot_price_after_updating_applied_discount ON "PackageSnapshot";
+
+DROP TRIGGER update_order_price_after_inserting_or_deleting_order_packages ON "OrderPackage";
+
+DROP TRIGGER update_order_price_after_updating_amount_of_packages_ordered ON "OrderPackage";
+
+DROP TRIGGER update_orders_prices_after_updating_package_snapshot_price ON "PackageSnapshot";
+
+DROP TRIGGER update_order_price_after_inserting_or_deleting_order_services ON "OrderService";
+
+DROP TRIGGER update_order_price_after_updating_amount_of_services_ordered ON "OrderService";
+
+DROP TRIGGER update_orders_prices_after_updating_service_snapshot_price ON "ServiceSnapshot";
+
+DROP TRIGGER update_payment_amount_with_commission_paid_after_updating_payment ON "Payment";

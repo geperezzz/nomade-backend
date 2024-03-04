@@ -1,20 +1,11 @@
 import { createZodDto } from 'nestjs-zod';
+import { hotelPerNightSchema } from './hotel-per-night.dto';
 import { z } from 'nestjs-zod/z';
 
-import { serviceSchema } from 'src/services/schemas/service.schema';
-
-const serviceWithOptionalIdSchema = serviceSchema
-  .partial()
-  .pick({ id: true })
-  .merge(serviceSchema.omit({ id: true }));
-
-export const createHotelPerNightSchema = serviceWithOptionalIdSchema
+export const createHotelPerNightSchema = hotelPerNightSchema
+  .innerType()
   .extend({
-    numberOfNights: z.coerce.number().int().positive(),
-    numberOfStars: z.coerce.number().int().positive().max(5),
-    numberOfRooms: z.coerce.number().int().positive(),
-    allowedNumberOfPeoplePerRoom: z.coerce.number().int().positive(),
-    checkoutTimestamp: z.coerce.date(),
+    id: z.string().uuid().optional(),
   })
   .refine(
     (hotelPerNight) =>
