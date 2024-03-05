@@ -22,14 +22,19 @@ import { Page } from 'src/common/pagination/page.type';
 @Controller('packages/:packageId/services')
 @ApiTags('Package services')
 export class PackageServicesController {
-  constructor(private readonly packageServicesService: PackageServicesService) {}
+  constructor(
+    private readonly packageServicesService: PackageServicesService,
+  ) {}
 
   @Post()
   async create(
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Body() createPackageServiceDto: CreatePackageServiceDto,
   ): Promise<PackageServiceDto> {
-    const createdPackage = await this.packageServicesService.create(packageId, createPackageServiceDto);
+    const createdPackage = await this.packageServicesService.create(
+      packageId,
+      createPackageServiceDto,
+    );
     return PackageServiceDto.fromEntity(createdPackage);
   }
 
@@ -38,8 +43,10 @@ export class PackageServicesController {
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<PackageServiceDto>> {
-    const foundPackagesPage =
-      await this.packageServicesService.findMany(packageId, paginationQueryDto);
+    const foundPackagesPage = await this.packageServicesService.findMany(
+      packageId,
+      paginationQueryDto,
+    );
     const items = foundPackagesPage.items.map(PackageServiceDto.fromEntity);
 
     return { ...foundPackagesPage, items };
@@ -50,7 +57,10 @@ export class PackageServicesController {
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Param('serviceId', ParseUUIDPipe) serviceId: string,
   ): Promise<PackageServiceDto> {
-    const foundPackage = await this.packageServicesService.findOne(packageId, serviceId);
+    const foundPackage = await this.packageServicesService.findOne(
+      packageId,
+      serviceId,
+    );
 
     if (!foundPackage) {
       throw new NotFoundException(
@@ -80,7 +90,10 @@ export class PackageServicesController {
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Param('serviceId', ParseUUIDPipe) serviceId: string,
   ): Promise<PackageServiceDto> {
-    const removedPackage = await this.packageServicesService.remove(packageId, serviceId);
+    const removedPackage = await this.packageServicesService.remove(
+      packageId,
+      serviceId,
+    );
     return PackageServiceDto.fromEntity(removedPackage);
   }
 }

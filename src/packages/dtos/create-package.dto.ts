@@ -8,12 +8,14 @@ export const createPackageSchema = z.object({
   name: z.string(),
   description: z.string(),
   appliedDiscountPercentage: z.coerce.number().min(0).max(100),
-  containedServices: z.array(
-    z.object({
-      serviceId: serviceSchema.shape.id,
-      amountContained: z.number().int().positive(),
-    }),
-  ).default(Array)
+  containedServices: z
+    .array(
+      z.object({
+        serviceId: serviceSchema.shape.id,
+        amountContained: z.number().int().positive(),
+      }),
+    )
+    .default(Array),
 });
 
 export class CreatePackageDto extends createZodDto(createPackageSchema) {}

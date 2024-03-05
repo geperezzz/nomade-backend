@@ -5,10 +5,7 @@ import { ServicesService } from './services.service';
 import { PackagesModule } from 'src/packages/packages.module';
 
 @Module({
-  imports: [
-    forwardRef(() => HotelsPerNightModule),
-    PackagesModule,
-  ],
+  imports: [forwardRef(() => HotelsPerNightModule), PackagesModule],
   controllers: [],
   providers: [ServicesService],
   exports: [ServicesService],

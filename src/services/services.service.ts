@@ -5,10 +5,16 @@ import { ServiceEntity } from './entities/service.entity';
 import { CreateServiceDto } from './dtos/create-service.dto';
 import { UpdateServiceDto } from './dtos/update-service.dto';
 import { PackagesService } from 'src/packages/packages.service';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
-export type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
+export type TransactionClient = Parameters<
+  Parameters<PrismaClient['$transaction']>[0]
+>[0];
 
 @Injectable()
 export class ServicesService {
@@ -19,9 +25,7 @@ export class ServicesService {
   ) {}
 
   @Transactional()
-  async create(
-    createServiceDto: CreateServiceDto,
-  ): Promise<ServiceEntity> {
+  async create(createServiceDto: CreateServiceDto): Promise<ServiceEntity> {
     const createdService = await this.currentTransaction.service.create({
       data: createServiceDto,
     });
@@ -40,7 +44,7 @@ export class ServicesService {
       },
       data: updateServiceDto,
     });
-    
+
     if (updateServiceDto.servicePrice) {
       await this.packagesService.updatePriceOfPackagesContainingTheService(id);
     }

@@ -3,11 +3,21 @@ import {
   HotelPerNight as HotelPerNightModel,
   Service as ServiceModel,
 } from '@prisma/client';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
-import { CreateHotelPerNightDto, createHotelPerNightOnlySchema } from './dtos/create-hotel-per-night.dto';
-import { UpdateHotelPerNightDto, updateHotelPerNightOnlySchema } from './dtos/update-hotel-per-night.dto';
+import {
+  CreateHotelPerNightDto,
+  createHotelPerNightOnlySchema,
+} from './dtos/create-hotel-per-night.dto';
+import {
+  UpdateHotelPerNightDto,
+  updateHotelPerNightOnlySchema,
+} from './dtos/update-hotel-per-night.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
@@ -53,21 +63,21 @@ export class HotelsPerNightService {
   async create(
     createHotelPerNightDto: CreateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
-    
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createHotelPerNightDto,
         serviceType: ServiceType.HOTEL_PER_NIGHT,
-      }) // strip out the HotelPerNight-specific fields
+      }), // strip out the HotelPerNight-specific fields
     );
-      
-    const createdHotelPerNight = await this.currentTransaction.hotelPerNight.create({
-      data: {
-        ...createHotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
-        id: createdService.id,
-      },
-      ...selectHotelPerNightEntityFields,
-    });
+
+    const createdHotelPerNight =
+      await this.currentTransaction.hotelPerNight.create({
+        data: {
+          ...createHotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
+          id: createdService.id,
+        },
+        ...selectHotelPerNightEntityFields,
+      });
 
     return rawEntityToEntity(createdHotelPerNight);
   }
@@ -79,13 +89,14 @@ export class HotelsPerNightService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const rawHotelsPerNight = await this.currentTransaction.hotelPerNight.findMany({
-      ...selectHotelPerNightEntityFields,
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+    const rawHotelsPerNight =
+      await this.currentTransaction.hotelPerNight.findMany({
+        ...selectHotelPerNightEntityFields,
+        skip: itemsPerPage * (pageIndex - 1),
+        take: itemsPerPage,
+      });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
-    
+
     const itemCount = await this.currentTransaction.hotelPerNight.count({
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
@@ -104,12 +115,13 @@ export class HotelsPerNightService {
 
   @Transactional()
   async findOne(id: string): Promise<HotelPerNightEntity | null> {
-    const rawHotelPerNight = await this.currentTransaction.hotelPerNight.findUnique({
-      where: {
-        id,
-      },
-      ...selectHotelPerNightEntityFields,
-    });
+    const rawHotelPerNight =
+      await this.currentTransaction.hotelPerNight.findUnique({
+        where: {
+          id,
+        },
+        ...selectHotelPerNightEntityFields,
+      });
     return rawHotelPerNight ? rawEntityToEntity(rawHotelPerNight) : null;
   }
 
@@ -122,26 +134,28 @@ export class HotelsPerNightService {
       id,
       updateServiceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
     );
-    
-    const updatedHotelPerNight = await this.currentTransaction.hotelPerNight.update({
-      where: {
-        id: updatedService.id,
-      },
-      data: updateHotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
-      ...selectHotelPerNightEntityFields,
-    });
+
+    const updatedHotelPerNight =
+      await this.currentTransaction.hotelPerNight.update({
+        where: {
+          id: updatedService.id,
+        },
+        data: updateHotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
+        ...selectHotelPerNightEntityFields,
+      });
 
     return rawEntityToEntity(updatedHotelPerNight);
   }
 
   @Transactional()
   async remove(id: string): Promise<HotelPerNightEntity> {
-    const removedHotelPerNight = await this.currentTransaction.hotelPerNight.delete({
-      where: {
-        id,
-      },
-      ...selectHotelPerNightEntityFields,
-    });
+    const removedHotelPerNight =
+      await this.currentTransaction.hotelPerNight.delete({
+        where: {
+          id,
+        },
+        ...selectHotelPerNightEntityFields,
+      });
     return rawEntityToEntity(removedHotelPerNight);
   }
 }

@@ -1,6 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
 
-import { hotelPerNightOnlySchema, hotelPerNightSchema } from './hotel-per-night.dto';
+import {
+  hotelPerNightOnlySchema,
+  hotelPerNightSchema,
+} from './hotel-per-night.dto';
 
 export const createHotelPerNightOnlySchema = hotelPerNightOnlySchema;
 

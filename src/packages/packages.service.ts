@@ -6,7 +6,11 @@ import { UpdatePackageDto } from './dtos/update-package.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { PackageEntity } from './entities/package.entity';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 const selectPackageEntityFields = {
@@ -39,11 +43,11 @@ export class PackagesService {
         ...createPackageDto,
         containedServices: {
           create: createPackageDto.containedServices,
-        }
+        },
       },
       select: {
         id: true,
-      }
+      },
     });
 
     if (!createPackageDto.containedServices) {
@@ -69,7 +73,7 @@ export class PackagesService {
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
-    
+
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
     return {
@@ -103,7 +107,7 @@ export class PackagesService {
       data: updatePackageDto,
       select: {
         id: true,
-      }
+      },
     });
 
     if (!updatePackageDto.appliedDiscountPercentage) {
@@ -124,32 +128,33 @@ export class PackagesService {
 
   @Transactional()
   async updatePriceOfPackage(id: string): Promise<PackageEntity> {
-    const { appliedDiscountPercentage, containedServices } = await this.currentTransaction.package.findUniqueOrThrow({
-      where: {
-        id,
-      },
-      select: {
-        appliedDiscountPercentage: true,
-        containedServices: {
-          select: {
-            service: {
-              select: {
-                servicePrice: true,
+    const { appliedDiscountPercentage, containedServices } =
+      await this.currentTransaction.package.findUniqueOrThrow({
+        where: {
+          id,
+        },
+        select: {
+          appliedDiscountPercentage: true,
+          containedServices: {
+            select: {
+              service: {
+                select: {
+                  servicePrice: true,
+                },
               },
+              amountContained: true,
             },
-            amountContained: true,
           },
         },
-      },
-    });
+      });
 
     const price = containedServices.reduce(
       (currentPrice, { service, amountContained }) => {
         return currentPrice.add(
           service.servicePrice
             .times(amountContained)
-            .times(Decimal.sub(100, appliedDiscountPercentage).div(100))
-        )
+            .times(Decimal.sub(100, appliedDiscountPercentage).div(100)),
+        );
       },
       new Decimal(0),
     );
@@ -166,22 +171,27 @@ export class PackagesService {
   }
 
   @Transactional()
-  async updatePriceOfPackagesContainingTheService(serviceId: string): Promise<void> {
-    const packagesContainingTheService = await this.currentTransaction.package.findMany({
-      where: {
-        containedServices: {
-          some: {
-            serviceId,
+  async updatePriceOfPackagesContainingTheService(
+    serviceId: string,
+  ): Promise<void> {
+    const packagesContainingTheService =
+      await this.currentTransaction.package.findMany({
+        where: {
+          containedServices: {
+            some: {
+              serviceId,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-      },
-    });
+        select: {
+          id: true,
+        },
+      });
 
     await Promise.all(
-      packagesContainingTheService.map(({ id }) => this.updatePriceOfPackage(id))
+      packagesContainingTheService.map(({ id }) =>
+        this.updatePriceOfPackage(id),
+      ),
     );
   }
 }

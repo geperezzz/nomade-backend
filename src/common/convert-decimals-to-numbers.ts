@@ -2,7 +2,7 @@ import { Decimal } from 'decimal.js';
 
 export type WithDecimalsAsNumbers<T> = {
   [Key in keyof T]: T[Key] extends Decimal ? number : T[Key];
-}
+};
 
 export function convertDecimalsToNumbers<T>(obj: T): WithDecimalsAsNumbers<T> {
   const result: any = {};

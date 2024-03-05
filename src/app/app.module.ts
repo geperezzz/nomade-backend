@@ -24,7 +24,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
         new ClsPluginTransactional({
           imports: [PrismaModule],
           adapter: new TransactionalAdapterPrisma({
-            prismaInjectionToken: PrismaService, 
+            prismaInjectionToken: PrismaService,
           }),
           enableTransactionProxy: true,
         }),

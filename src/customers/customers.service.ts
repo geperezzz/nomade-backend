@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 import { CreateCustomerDto } from './dtos/create-customer.dto';
@@ -25,18 +29,18 @@ export class CustomersService {
   @Transactional()
   async findMany(
     paginationQueryDto: PaginationQueryDto,
-  ): Promise<Page<CustomerEntity>> {    
+  ): Promise<Page<CustomerEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
-    
+
     const items = await this.currentTransaction.customer.findMany({
       where: {
         deletedAt: null,
       },
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
-    })
-    
+    });
+
     const itemCount = await this.currentTransaction.customer.count({
       where: {
         deletedAt: null,

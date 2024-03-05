@@ -40,7 +40,9 @@ export class HotelsPerNightController {
   ): Promise<Page<HotelPerNightDto>> {
     const foundHotelsPerNightPage =
       await this.hotelsPerNightService.findMany(paginationQueryDto);
-    const items = foundHotelsPerNightPage.items.map(HotelPerNightDto.fromEntity);
+    const items = foundHotelsPerNightPage.items.map(
+      HotelPerNightDto.fromEntity,
+    );
 
     return { ...foundHotelsPerNightPage, items };
   }

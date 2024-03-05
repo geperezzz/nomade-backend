@@ -5,7 +5,11 @@ import { UpdatePackageServiceDto } from './dtos/update-package-service.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { PackageServiceEntity } from './entities/package-service.entity';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { PackagesService } from '../packages.service';
 
@@ -18,13 +22,17 @@ export class PackageServicesService {
   ) {}
 
   @Transactional()
-  async create(packageId: string, createPackageServiceDto: CreatePackageServiceDto): Promise<PackageServiceEntity> {
-    const createdPackageService = await this.currentTransaction.packageService.create({
-      data: {
-        ...createPackageServiceDto,
-        packageId,
-      },
-    });
+  async create(
+    packageId: string,
+    createPackageServiceDto: CreatePackageServiceDto,
+  ): Promise<PackageServiceEntity> {
+    const createdPackageService =
+      await this.currentTransaction.packageService.create({
+        data: {
+          ...createPackageServiceDto,
+          packageId,
+        },
+      });
     await this.packagesService.updatePriceOfPackage(packageId);
     return createdPackageService;
   }
@@ -52,7 +60,7 @@ export class PackageServicesService {
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
-    
+
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
     return {
@@ -65,7 +73,10 @@ export class PackageServicesService {
   }
 
   @Transactional()
-  async findOne(packageId: string, serviceId: string): Promise<PackageServiceEntity | null> {
+  async findOne(
+    packageId: string,
+    serviceId: string,
+  ): Promise<PackageServiceEntity | null> {
     return await this.currentTransaction.packageService.findUnique({
       where: {
         packageId_serviceId: {
@@ -82,29 +93,34 @@ export class PackageServicesService {
     serviceId: string,
     updatePackageServiceDto: UpdatePackageServiceDto,
   ): Promise<PackageServiceEntity> {
-    const updatedPackageService = await this.currentTransaction.packageService.update({
-      where: {
-        packageId_serviceId: {
-          packageId,
-          serviceId,
+    const updatedPackageService =
+      await this.currentTransaction.packageService.update({
+        where: {
+          packageId_serviceId: {
+            packageId,
+            serviceId,
+          },
         },
-      },
-      data: updatePackageServiceDto,
-    });
+        data: updatePackageServiceDto,
+      });
     await this.packagesService.updatePriceOfPackage(packageId);
     return updatedPackageService;
   }
 
   @Transactional()
-  async remove(packageId: string, serviceId: string): Promise<PackageServiceEntity> {
-    const removedPackageService = await this.currentTransaction.packageService.delete({
-      where: {
-        packageId_serviceId: {
-          packageId,
-          serviceId,
+  async remove(
+    packageId: string,
+    serviceId: string,
+  ): Promise<PackageServiceEntity> {
+    const removedPackageService =
+      await this.currentTransaction.packageService.delete({
+        where: {
+          packageId_serviceId: {
+            packageId,
+            serviceId,
+          },
         },
-      },
-    });
+      });
     await this.packagesService.updatePriceOfPackage(packageId);
     return removedPackageService;
   }
