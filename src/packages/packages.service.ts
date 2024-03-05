@@ -112,6 +112,7 @@ export class PackagesService {
     return await this.updatePriceOfPackage(newId);
   }
 
+  @Transactional()
   async remove(id: string): Promise<PackageEntity> {
     return await this.currentTransaction.package.delete({
       where: {
