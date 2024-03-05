@@ -1,11 +1,13 @@
 import { createZodDto } from 'nestjs-zod';
-import { hotelPerNightSchema } from './hotel-per-night.dto';
-import { z } from 'nestjs-zod/z';
+
+import { hotelPerNightOnlySchema, hotelPerNightSchema } from './hotel-per-night.dto';
+
+export const createHotelPerNightOnlySchema = hotelPerNightOnlySchema;
 
 export const createHotelPerNightSchema = hotelPerNightSchema
   .innerType()
   .extend({
-    id: z.string().uuid().optional(),
+    id: hotelPerNightSchema.innerType().shape.id.optional(),
   })
   .refine(
     (hotelPerNight) =>

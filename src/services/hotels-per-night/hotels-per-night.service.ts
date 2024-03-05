@@ -3,18 +3,18 @@ import {
   HotelPerNight as HotelPerNightModel,
   Service as ServiceModel,
 } from '@prisma/client';
+import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
-import { CreateHotelPerNightDto } from './dtos/create-hotel-per-night.dto';
-import { UpdateHotelPerNightDto } from './dtos/update-hotel-per-night.dto';
+import { CreateHotelPerNightDto, createHotelPerNightOnlySchema } from './dtos/create-hotel-per-night.dto';
+import { UpdateHotelPerNightDto, updateHotelPerNightOnlySchema } from './dtos/update-hotel-per-night.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
-import { serviceSchema } from '../dtos/service.dto';
-import { hotelPerNightOnlySchema } from './dtos/hotel-per-night.dto';
 import { ServicesService } from '../services.service';
 import { ServiceType } from '../entities/service.entity';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
-import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { createServiceSchema } from '../dtos/create-service.dto';
+import { updateServiceSchema } from '../dtos/update-service.dto';
 
 const selectHotelPerNightEntityFields = {
   include: {
@@ -53,16 +53,17 @@ export class HotelsPerNightService {
   async create(
     createHotelPerNightDto: CreateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
+    
     const createdService = await this.servicesService.create(
-      serviceSchema.parse({
+      createServiceSchema.parse({
         ...createHotelPerNightDto,
         serviceType: ServiceType.HOTEL_PER_NIGHT,
       }) // strip out the HotelPerNight-specific fields
     );
-
+      
     const createdHotelPerNight = await this.currentTransaction.hotelPerNight.create({
       data: {
-        ...hotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
+        ...createHotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
         id: createdService.id,
       },
       ...selectHotelPerNightEntityFields,
@@ -119,14 +120,14 @@ export class HotelsPerNightService {
   ): Promise<HotelPerNightEntity> {
     const updatedService = await this.servicesService.update(
       id,
-      serviceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
+      updateServiceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
     );
     
     const updatedHotelPerNight = await this.currentTransaction.hotelPerNight.update({
       where: {
         id: updatedService.id,
       },
-      data: hotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
+      data: updateHotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
       ...selectHotelPerNightEntityFields,
     });
 
