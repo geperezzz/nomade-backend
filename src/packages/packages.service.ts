@@ -3,10 +3,11 @@ import { Decimal } from 'decimal.js';
 
 import { CreatePackageDto } from './dtos/create-package.dto';
 import { UpdatePackageDto } from './dtos/update-package.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { PackageEntity } from './entities/package.entity';
+import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 const selectPackageEntityFields = {
   select: {
@@ -26,10 +27,14 @@ const selectPackageEntityFields = {
 
 @Injectable()
 export class PackagesService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    @InjectTransaction()
+    private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+  ) {}
 
+  @Transactional()
   async create(createPackageDto: CreatePackageDto): Promise<PackageEntity> {
-    const { id } = await this.prismaService.package.create({
+    const { id } = await this.currentTransaction.package.create({
       data: {
         ...createPackageDto,
         containedServices: {
@@ -47,23 +52,23 @@ export class PackagesService {
     return await this.updatePriceOfPackage(id);
   }
 
+  @Transactional()
   async findMany(
     paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<PackageEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const [items, itemCount] = await this.prismaService.$transaction([
-      this.prismaService.package.findMany({
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-        ...selectPackageEntityFields,
-      }),
-      this.prismaService.package.count({
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-      }),
-    ]);
+    const items = await this.currentTransaction.package.findMany({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+      ...selectPackageEntityFields,
+    });
+
+    const itemCount = await this.currentTransaction.package.count({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
     
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
@@ -76,8 +81,9 @@ export class PackagesService {
     };
   }
 
+  @Transactional()
   async findOne(id: string): Promise<PackageEntity | null> {
-    return await this.prismaService.package.findUnique({
+    return await this.currentTransaction.package.findUnique({
       where: {
         id,
       },
@@ -85,11 +91,12 @@ export class PackagesService {
     });
   }
 
+  @Transactional()
   async update(
     id: string,
     updatePackageDto: UpdatePackageDto,
   ): Promise<PackageEntity> {
-    const { id: newId } = await this.prismaService.package.update({
+    const { id: newId } = await this.currentTransaction.package.update({
       where: {
         id,
       },
@@ -106,7 +113,7 @@ export class PackagesService {
   }
 
   async remove(id: string): Promise<PackageEntity> {
-    return await this.prismaService.package.delete({
+    return await this.currentTransaction.package.delete({
       where: {
         id,
       },
@@ -114,8 +121,9 @@ export class PackagesService {
     });
   }
 
+  @Transactional()
   async updatePriceOfPackage(id: string): Promise<PackageEntity> {
-    const { appliedDiscountPercentage, containedServices } = await this.prismaService.package.findUniqueOrThrow({
+    const { appliedDiscountPercentage, containedServices } = await this.currentTransaction.package.findUniqueOrThrow({
       where: {
         id,
       },
@@ -145,7 +153,7 @@ export class PackagesService {
       new Decimal(0),
     );
 
-    return await this.prismaService.package.update({
+    return await this.currentTransaction.package.update({
       where: {
         id,
       },
@@ -154,5 +162,25 @@ export class PackagesService {
       },
       ...selectPackageEntityFields,
     });
+  }
+
+  @Transactional()
+  async updatePriceOfPackagesContainingTheService(serviceId: string): Promise<void> {
+    const packagesContainingTheService = await this.currentTransaction.package.findMany({
+      where: {
+        containedServices: {
+          some: {
+            serviceId,
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await Promise.all(
+      packagesContainingTheService.map(({ id }) => this.updatePriceOfPackage(id))
+    );
   }
 }

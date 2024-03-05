@@ -1,44 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ServiceEntity } from './entities/service.entity';
 import { CreateServiceDto } from './dtos/create-service.dto';
 import { UpdateServiceDto } from './dtos/update-service.dto';
+import { PackagesService } from 'src/packages/packages.service';
+import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 export type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 @Injectable()
 export class ServicesService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    @InjectTransaction()
+    private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    private packagesService: PackagesService,
+  ) {}
 
+  @Transactional()
   async create(
     createServiceDto: CreateServiceDto,
-    transactionClient?: TransactionClient,
   ): Promise<ServiceEntity> {
-    const databaseClient = transactionClient || this.prismaService;
-
-    const createdService = await databaseClient.service.create({
+    const createdService = await this.currentTransaction.service.create({
       data: createServiceDto,
     });
 
     return createdService;
   }
 
+  @Transactional()
   async update(
     id: string,
     updateServiceDto: UpdateServiceDto,
-    transactionClient?: TransactionClient,
   ): Promise<ServiceEntity> {
-    const databaseClient = transactionClient || this.prismaService;
-    
-    const updatedService = await databaseClient.service.update({
+    const updatedService = await this.currentTransaction.service.update({
       where: {
         id,
       },
       data: updateServiceDto,
     });
     
+    if (updateServiceDto.servicePrice) {
+      await this.packagesService.updatePriceOfPackagesContainingTheService(id);
+    }
+
     return updatedService;
   }
 }

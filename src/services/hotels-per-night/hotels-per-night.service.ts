@@ -6,7 +6,6 @@ import {
 
 import { CreateHotelPerNightDto } from './dtos/create-hotel-per-night.dto';
 import { UpdateHotelPerNightDto } from './dtos/update-hotel-per-night.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
@@ -14,6 +13,8 @@ import { serviceSchema } from '../dtos/service.dto';
 import { hotelPerNightOnlySchema } from './dtos/hotel-per-night.dto';
 import { ServicesService } from '../services.service';
 import { ServiceType } from '../entities/service.entity';
+import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 const selectHotelPerNightEntityFields = {
   include: {
@@ -42,52 +43,53 @@ function rawEntityToEntity(
 
 @Injectable()
 export class HotelsPerNightService {
-  constructor(private prismaService: PrismaService, private servicesService: ServicesService) {}
+  constructor(
+    @InjectTransaction()
+    private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    private servicesService: ServicesService,
+  ) {}
 
+  @Transactional()
   async create(
     createHotelPerNightDto: CreateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
-    return this.prismaService.$transaction(async (transactionClient) => {
-      const createdService = await this.servicesService.create(
-        serviceSchema.parse({
-          ...createHotelPerNightDto,
-          serviceType: ServiceType.HOTEL_PER_NIGHT,
-          transactionClient,
-        }) // strip out the HotelPerNight-specific fields
-      );
+    const createdService = await this.servicesService.create(
+      serviceSchema.parse({
+        ...createHotelPerNightDto,
+        serviceType: ServiceType.HOTEL_PER_NIGHT,
+      }) // strip out the HotelPerNight-specific fields
+    );
 
-      const createdHotelPerNight = await transactionClient.hotelPerNight.create({
-        data: {
-          ...hotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
-          id: createdService.id,
-        },
-        ...selectHotelPerNightEntityFields,
-      });
-
-      return rawEntityToEntity(createdHotelPerNight);
+    const createdHotelPerNight = await this.currentTransaction.hotelPerNight.create({
+      data: {
+        ...hotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
+        id: createdService.id,
+      },
+      ...selectHotelPerNightEntityFields,
     });
+
+    return rawEntityToEntity(createdHotelPerNight);
   }
 
+  @Transactional()
   async findMany(
     paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<HotelPerNightEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const [rawHotelsPerNight, itemCount] =
-      await this.prismaService.$transaction([
-        this.prismaService.hotelPerNight.findMany({
-          ...selectHotelPerNightEntityFields,
-          skip: itemsPerPage * (pageIndex - 1),
-          take: itemsPerPage,
-        }),
-        this.prismaService.hotelPerNight.count({
-          skip: itemsPerPage * (pageIndex - 1),
-          take: itemsPerPage,
-        }),
-      ]);
-
+    const rawHotelsPerNight = await this.currentTransaction.hotelPerNight.findMany({
+      ...selectHotelPerNightEntityFields,
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
+    
+    const itemCount = await this.currentTransaction.hotelPerNight.count({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
+
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
     return {
@@ -99,8 +101,9 @@ export class HotelsPerNightService {
     };
   }
 
+  @Transactional()
   async findOne(id: string): Promise<HotelPerNightEntity | null> {
-    const rawHotelPerNight = await this.prismaService.hotelPerNight.findUnique({
+    const rawHotelPerNight = await this.currentTransaction.hotelPerNight.findUnique({
       where: {
         id,
       },
@@ -109,31 +112,30 @@ export class HotelsPerNightService {
     return rawHotelPerNight ? rawEntityToEntity(rawHotelPerNight) : null;
   }
 
+  @Transactional()
   async update(
     id: string,
     updateHotelPerNightDto: UpdateHotelPerNightDto,
   ): Promise<HotelPerNightEntity> {
-    return this.prismaService.$transaction(async (transactionClient) => {
-      const updatedService = await this.servicesService.update(
-        id,
-        serviceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
-        transactionClient,
-      );
-      
-      const updatedHotelPerNight = await this.prismaService.hotelPerNight.update({
-        where: {
-          id: updatedService.id,
-        },
-        data: hotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
-        ...selectHotelPerNightEntityFields,
-      });
-
-      return rawEntityToEntity(updatedHotelPerNight);
+    const updatedService = await this.servicesService.update(
+      id,
+      serviceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
+    );
+    
+    const updatedHotelPerNight = await this.currentTransaction.hotelPerNight.update({
+      where: {
+        id: updatedService.id,
+      },
+      data: hotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
+      ...selectHotelPerNightEntityFields,
     });
+
+    return rawEntityToEntity(updatedHotelPerNight);
   }
 
+  @Transactional()
   async remove(id: string): Promise<HotelPerNightEntity> {
-    const removedHotelPerNight = await this.prismaService.hotelPerNight.delete({
+    const removedHotelPerNight = await this.currentTransaction.hotelPerNight.delete({
       where: {
         id,
       },

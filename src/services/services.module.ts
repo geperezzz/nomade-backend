@@ -1,13 +1,13 @@
 import { Module, forwardRef } from '@nestjs/common';
 
 import { HotelsPerNightModule } from './hotels-per-night/hotels-per-night.module';
-import { PrismaModule } from 'src/prisma/prisma.module';
 import { ServicesService } from './services.service';
+import { PackagesModule } from 'src/packages/packages.module';
 
 @Module({
   imports: [
     forwardRef(() => HotelsPerNightModule),
-    PrismaModule
+    PackagesModule,
   ],
   controllers: [],
   providers: [ServicesService],
