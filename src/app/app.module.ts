@@ -14,6 +14,7 @@ import { PackagesModule } from 'src/packages/packages.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrdersModule } from 'src/orders/orders.module';
+import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
 
 @Module({
   imports: [
@@ -35,8 +36,9 @@ import { OrdersModule } from 'src/orders/orders.module';
     }),
     CustomersModule,
     OrdersModule,
-    ServicesModule,
+    PaymentMethodsModule,
     PackagesModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [
