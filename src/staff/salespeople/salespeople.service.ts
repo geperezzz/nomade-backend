@@ -95,6 +95,11 @@ export class SalespeopleService {
 
   @Transactional()
   async remove(id: string): Promise<SalespersonEntity> {
+    const salesperson = await this.findOne(id);
+    if (!salesperson) {
+      throw new Error(`There is no salesperson with ID ${id}`);
+    }
+    
     return await this.currentTransaction.employee.update({
       where: {
         id,
@@ -104,7 +109,12 @@ export class SalespeopleService {
         },
       },
       data: {
-        deletedAt: new Date(),
+        occupations: {
+          set: salesperson.occupations.filter(occupation => occupation !== EmployeeOccupation.SALESPERSON),
+        },
+        asSalesperson: {
+          delete: {},
+        }
       },
     });
   }
