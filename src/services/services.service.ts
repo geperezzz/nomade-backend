@@ -1,10 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
-import { ServiceEntity } from './entities/service.entity';
-import { CreateServiceDto } from './dtos/create-service.dto';
-import { UpdateServiceDto } from './dtos/update-service.dto';
-import { PackagesService } from 'src/packages/packages.service';
 import {
   InjectTransaction,
   Transaction,
@@ -12,9 +6,12 @@ import {
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
-export type TransactionClient = Parameters<
-  Parameters<PrismaClient['$transaction']>[0]
->[0];
+import { ServiceEntity } from './entities/service.entity';
+import { CreateServiceDto } from './dtos/create-service.dto';
+import { UpdateServiceDto } from './dtos/update-service.dto';
+import { PackagesService } from 'src/packages/packages.service';
+import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
+import { Page } from 'src/common/pagination/page.type';
 
 @Injectable()
 export class ServicesService {
@@ -26,13 +23,49 @@ export class ServicesService {
 
   @Transactional()
   async create(createServiceDto: CreateServiceDto): Promise<ServiceEntity> {
-    const createdService = await this.currentTransaction.service.create({
+    return await this.currentTransaction.service.create({
       data: createServiceDto,
     });
-
-    return createdService;
+  }
+  
+  @Transactional()
+  async findMany(
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<Page<ServiceEntity>> {
+    const pageIndex = paginationQueryDto.page;
+    const itemsPerPage = paginationQueryDto['per-page'];
+    
+    const items =
+    await this.currentTransaction.service.findMany({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
+    
+    const itemCount = await this.currentTransaction.service.count({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
+    
+    const pageCount = Math.ceil(itemCount / itemsPerPage);
+    
+    return {
+      pageIndex,
+      itemsPerPage,
+      pageCount,
+      itemCount,
+      items,
+    };
   }
 
+  @Transactional()
+  async findOne(id: string): Promise<ServiceEntity | null> {
+    return await this.currentTransaction.service.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+    
   @Transactional()
   async update(
     id: string,
