@@ -247,16 +247,16 @@ model Event {
 }
 
 model PackageSnapshot {
-  id                   String                   @id @default(uuid()) @db.Uuid
-  snapshotTimestamp    DateTime                 @default(now())
-  originalPackage      Package?                 @relation(fields: [originalPackageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  originalPackageId    String?                  @db.Uuid
-  name                 String
-  description          String
-  price                Decimal
-  appliedDiscount      Decimal
-  containedServices    PackageSnapshotService[]
-  ordersContainingThis OrderPackage[]
+  id                        String                   @id @default(uuid()) @db.Uuid
+  snapshotTimestamp         DateTime                 @default(now())
+  originalPackage           Package?                 @relation(fields: [originalPackageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  originalPackageId         String?                  @db.Uuid
+  name                      String
+  description               String
+  price                     Decimal
+  appliedDiscountPercentage Decimal
+  containedServices         PackageSnapshotService[]
+  ordersContainingThis      OrderPackage[]
 }
 
 model PackageSnapshotService {
