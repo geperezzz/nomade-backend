@@ -64,10 +64,7 @@ export class PackagesService {
       ...selectPackageEntityFields,
     });
 
-    const itemCount = await this.currentTransaction.package.count({
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+    const itemCount = await this.currentTransaction.package.count();
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 

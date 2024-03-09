@@ -45,8 +45,6 @@ export class CustomersService {
       where: {
         deletedAt: null,
       },
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
     });
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);

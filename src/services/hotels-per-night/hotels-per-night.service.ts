@@ -97,10 +97,7 @@ export class HotelsPerNightService {
       });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
 
-    const itemCount = await this.currentTransaction.hotelPerNight.count({
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+    const itemCount = await this.currentTransaction.hotelPerNight.count();
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 

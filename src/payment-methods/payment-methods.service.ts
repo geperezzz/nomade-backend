@@ -38,10 +38,7 @@ export class PaymentMethodsService {
       take: itemsPerPage,
     });
 
-    const itemCount = await this.currentTransaction.paymentMethod.count({
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+    const itemCount = await this.currentTransaction.paymentMethod.count();
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 

@@ -41,10 +41,7 @@ export class ServicesService {
       take: itemsPerPage,
     });
     
-    const itemCount = await this.currentTransaction.service.count({
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+    const itemCount = await this.currentTransaction.service.count();
     
     const pageCount = Math.ceil(itemCount / itemsPerPage);
     

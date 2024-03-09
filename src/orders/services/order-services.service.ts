@@ -67,8 +67,6 @@ export class OrderServicesService {
       where: {
         orderId,
       },
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
     });
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);

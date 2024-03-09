@@ -31,7 +31,7 @@ export class SalespeopleService {
       },
       data: {
         occupations: {
-          push: EmployeeOccupation.SALESPERSON,
+          push: StaffOccupation.SALESPERSON,
         },
         asSalesperson: {
           create: {},
@@ -51,7 +51,7 @@ export class SalespeopleService {
       where: {
         deletedAt: null,
         occupations: {
-          has: EmployeeOccupation.SALESPERSON,
+          has: StaffOccupation.SALESPERSON,
         },
       },
       skip: itemsPerPage * (pageIndex - 1),
@@ -62,11 +62,9 @@ export class SalespeopleService {
       where: {
         deletedAt: null,
         occupations: {
-          has: EmployeeOccupation.SALESPERSON,
+          has: StaffOccupation.SALESPERSON,
         },
       },
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
     });
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
@@ -87,7 +85,7 @@ export class SalespeopleService {
         id,
         deletedAt: null,
         occupations: {
-          has: EmployeeOccupation.SALESPERSON,
+          has: StaffOccupation.SALESPERSON,
         },
       },
     });
@@ -105,12 +103,12 @@ export class SalespeopleService {
         id,
         deletedAt: null,
         occupations: {
-          has: EmployeeOccupation.SALESPERSON,
+          has: StaffOccupation.SALESPERSON,
         },
       },
       data: {
         occupations: {
-          set: salesperson.occupations.filter(occupation => occupation !== EmployeeOccupation.SALESPERSON),
+          set: salesperson.occupations.filter(occupation => occupation !== StaffOccupation.SALESPERSON),
         },
         asSalesperson: {
           delete: {},

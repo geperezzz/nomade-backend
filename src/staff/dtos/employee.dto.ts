@@ -14,7 +14,7 @@ export const employeeSchema = z.object({
   phoneNumber: z.string(),
   email: z.string().email(),
   salary: z.coerce.number().nonnegative().finite(),
-  occupations: z.array(z.nativeEnum(EmployeeOccupation)),
+  occupations: z.array(z.nativeEnum(StaffOccupation)),
 });
 
 export class EmployeeDto extends createZodDto(employeeSchema) {

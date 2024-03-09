@@ -66,8 +66,6 @@ export class PackageServicesService {
       where: {
         packageId,
       },
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
     });
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
