@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
-import { serviceSchema } from 'src/services/dtos/service.dto';
+import { createPackageServiceSchema } from '../services/dtos/create-package-service.dto';
 
 export const createPackageSchema = z.object({
   id: z.string().uuid().optional(),
@@ -9,12 +9,7 @@ export const createPackageSchema = z.object({
   description: z.string(),
   appliedDiscountPercentage: z.coerce.number().min(0).max(100),
   containedServices: z
-    .array(
-      z.object({
-        serviceId: serviceSchema.shape.id,
-        amountContained: z.number().int().positive(),
-      }),
-    )
+    .array(createPackageServiceSchema)
     .default(Array),
 });
 

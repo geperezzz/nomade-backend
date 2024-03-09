@@ -8,5 +8,6 @@ import { ServicesModule } from '../services.module';
   imports: [forwardRef(() => ServicesModule)],
   controllers: [HotelsPerNightController],
   providers: [HotelsPerNightService],
+  exports: [HotelsPerNightService],
 })
 export class HotelsPerNightModule {}

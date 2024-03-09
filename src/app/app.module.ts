@@ -13,6 +13,7 @@ import { ServicesModule } from 'src/services/services.module';
 import { PackagesModule } from 'src/packages/packages.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
       middleware: { mount: true },
     }),
     CustomersModule,
+    OrdersModule,
     ServicesModule,
     PackagesModule,
   ],

@@ -13,6 +13,13 @@ import {
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { PackagesService } from '../packages.service';
 
+const selectPackageServiceEntityFields = {
+  select: {
+    serviceId: true,
+    amountContained: true,
+  },
+} as const;
+
 @Injectable()
 export class PackageServicesService {
   constructor(
@@ -32,6 +39,7 @@ export class PackageServicesService {
           ...createPackageServiceDto,
           packageId,
         },
+        ...selectPackageServiceEntityFields,
       });
     await this.packagesService.updatePriceOfPackage(packageId);
     return createdPackageService;
@@ -49,6 +57,7 @@ export class PackageServicesService {
       where: {
         packageId,
       },
+      ...selectPackageServiceEntityFields,
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
@@ -83,6 +92,7 @@ export class PackageServicesService {
           packageId,
           serviceId,
         },
+        ...selectPackageServiceEntityFields,
       },
     });
   }
@@ -102,6 +112,7 @@ export class PackageServicesService {
           },
         },
         data: updatePackageServiceDto,
+        ...selectPackageServiceEntityFields,
       });
     await this.packagesService.updatePriceOfPackage(packageId);
     return updatedPackageService;
@@ -120,6 +131,7 @@ export class PackageServicesService {
             serviceId,
           },
         },
+        ...selectPackageServiceEntityFields,
       });
     await this.packagesService.updatePriceOfPackage(packageId);
     return removedPackageService;

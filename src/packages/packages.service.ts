@@ -14,12 +14,7 @@ import {
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 const selectPackageEntityFields = {
-  select: {
-    id: true,
-    name: true,
-    description: true,
-    price: true,
-    appliedDiscountPercentage: true,
+  include: {
     containedServices: {
       select: {
         serviceId: true,

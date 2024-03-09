@@ -1,6 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
-import { ServiceType } from '../entities/service.entity';
+
+import { ServiceEntity, ServiceType } from '../entities/service.entity';
 
 export const serviceSchema = z.object({
   id: z.string().uuid(),
@@ -12,4 +13,8 @@ export const serviceSchema = z.object({
   serviceType: z.nativeEnum(ServiceType),
 });
 
-export class ServiceDto extends createZodDto(serviceSchema) {}
+export class ServiceDto extends createZodDto(serviceSchema) {
+  static fromEntity(entity: ServiceEntity): ServiceDto {
+    return serviceSchema.parse(entity);
+  }
+}

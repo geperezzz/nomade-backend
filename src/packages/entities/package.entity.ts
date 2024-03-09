@@ -3,6 +3,6 @@ import {
   PackageService as PackageServiceModel,
 } from '@prisma/client';
 
-export type PackageEntity = Omit<PackageModel, 'lastUpdateTimestamp'> & {
+export type PackageEntity = PackageModel & {
   containedServices: Omit<PackageServiceModel, 'packageId'>[];
 };

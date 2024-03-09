@@ -5,4 +5,5 @@ import {
 
 export type ServiceEntity = ServiceModel;
 
+export type ServiceType = PrismaServiceType;
 export const ServiceType = PrismaServiceType;
