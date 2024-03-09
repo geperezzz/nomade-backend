@@ -20,7 +20,7 @@ import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 
 @Controller('orders/:orderId/packages')
-@ApiTags('Order packages')
+@ApiTags('Orders\' packages')
 export class OrderPackagesController {
   constructor(private readonly orderPackagesService: OrderPackagesService) {}
 

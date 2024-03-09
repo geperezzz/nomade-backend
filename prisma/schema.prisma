@@ -25,19 +25,19 @@ model Customer {
 }
 
 model Employee {
-  id          String               @id @default(uuid()) @db.Uuid
-  firstName   String
-  lastName    String
-  occupations EmployeeOccupation[]
-  address     String
-  dni         String
-  birthdate   DateTime             @db.Date
-  citizenship String
-  phoneNumber String
-  email       String
-  salary      Decimal
-  deletedAt   DateTime?
-  asSalesman  Salesman?
+  id            String               @id @default(uuid()) @db.Uuid
+  firstName     String
+  lastName      String
+  occupations   EmployeeOccupation[] @default([])
+  address       String
+  dni           String
+  birthdate     DateTime             @db.Date
+  citizenship   String
+  phoneNumber   String
+  email         String
+  salary        Decimal
+  deletedAt     DateTime?
+  asSalesperson Salesperson?
 
   @@unique([dni, deletedAt])
   @@unique([email, deletedAt])
@@ -46,10 +46,10 @@ model Employee {
 enum EmployeeOccupation {
   SUPER_ADMIN
   ADMIN
-  SALESMAN
+  SALESPERSON
 }
 
-model Salesman {
+model Salesperson {
   asEmployee   Employee @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   id           String   @id @db.Uuid
   placedOrders Order[]
@@ -63,8 +63,8 @@ model Order {
   payments           Payment[]
   customer           Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   customerId         String         @db.Uuid
-  salesman           Salesman       @relation(fields: [salesmanId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  salesmanId         String         @db.Uuid
+  salesperson        Salesperson    @relation(fields: [salespersonId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  salespersonId      String         @db.Uuid
   placementTimestamp DateTime       @default(now())
 }
 

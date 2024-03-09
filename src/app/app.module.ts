@@ -15,6 +15,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrdersModule } from 'src/orders/orders.module';
 import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
+import { StaffModule } from 'src/staff/staff.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module
       global: true,
       middleware: { mount: true },
     }),
+    StaffModule,
     CustomersModule,
     OrdersModule,
     PaymentMethodsModule,

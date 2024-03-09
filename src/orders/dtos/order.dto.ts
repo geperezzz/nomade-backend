@@ -15,7 +15,7 @@ export const orderSchema = z.object({
   price: z.coerce.number().nonnegative().finite(),
   payments: z.array(orderPaymentSchema),
   customerId: customerSchema.shape.id,
-  salesmanId: z.string().uuid(),
+  salespersonId: z.string().uuid(),
   placementTimestamp: z.date(),
 });
 
