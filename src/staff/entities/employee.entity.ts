@@ -2,5 +2,5 @@ import { Employee as EmployeeModel, EmployeeOccupation as PrismaEmployeeOccupati
 
 export type EmployeeEntity = EmployeeModel;
 
-export type EmployeeOccupation = PrismaEmployeeOccupation;
-export const EmployeeOccupation = PrismaEmployeeOccupation;
+export type StaffOccupation = PrismaEmployeeOccupation;
+export const StaffOccupation = PrismaEmployeeOccupation;

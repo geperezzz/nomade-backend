@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
-import { EmployeeEntity, EmployeeOccupation } from '../entities/employee.entity';
+import { EmployeeEntity, StaffOccupation } from '../entities/employee.entity';
 
 export const employeeSchema = z.object({
   id: z.string().uuid(),

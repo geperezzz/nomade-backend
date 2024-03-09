@@ -10,7 +10,7 @@ import { CreateSalespersonDto } from './dtos/create-salesperson.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { SalespersonEntity } from './entities/salesperson.entity';
-import { EmployeeOccupation } from '../entities/employee.entity';
+import { StaffOccupation } from '../entities/employee.entity';
 
 @Injectable()
 export class SalespeopleService {
