@@ -302,13 +302,13 @@ model HotelPerNightSnapshot {
 }
 
 model CarRentalSnapshot {
-  asService          ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  id                 String          @id @default(uuid()) @db.Uuid
-  carReturnTimestamp DateTime
-  carBrand           String
-  carModel           String
-  numberOfCarSeats   Int
-  carEngineType      CarEngineType
+  asService             ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                    String          @id @default(uuid()) @db.Uuid
+  carReturnTimestamp    DateTime
+  carBrand              String
+  carModel              String
+  numberOfSeatsInTheCar Int
+  carEngineType         CarEngineType
 }
 
 model BusTicketSnapshot {

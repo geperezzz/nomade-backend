@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
-  HotelPerNight as HotelPerNightModel,
+  CarRental as CarRentalModel,
   Service as ServiceModel,
 } from '@prisma/client';
 import {
@@ -11,22 +11,22 @@ import {
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 import {
-  CreateHotelPerNightDto,
-  createHotelPerNightOnlySchema,
-} from './dtos/create-hotel-per-night.dto';
+  CreateCarRentalDto,
+  createCarRentalOnlySchema,
+} from './dtos/create-car-rental.dto';
 import {
-  UpdateHotelPerNightDto,
-  updateHotelPerNightOnlySchema,
-} from './dtos/update-hotel-per-night.dto';
+  UpdateCarRentalDto,
+  updateCarRentalOnlySchema,
+} from './dtos/update-car-rental.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
-import { HotelPerNightEntity } from './entities/hotel-per-night.entity';
+import { CarRentalEntity } from './entities/car-rental.entity';
 import { ServicesService } from '../services.service';
 import { ServiceType } from '../entities/service.entity';
 import { createServiceSchema } from '../dtos/create-service.dto';
 import { updateServiceSchema } from '../dtos/update-service.dto';
 
-const selectHotelPerNightEntityFields = {
+const selectCarRentalFields = {
   include: {
     asService: {
       select: {
@@ -41,19 +41,19 @@ const selectHotelPerNightEntityFields = {
   },
 } as const;
 
-type HotelPerNightRawEntity = HotelPerNightModel & {
+type CarRentalRawEntity = CarRentalModel & {
   asService: Omit<ServiceModel, 'id' | 'serviceType'>;
 };
 
 function rawEntityToEntity(
-  rawHotelPerNight: HotelPerNightRawEntity,
-): HotelPerNightEntity {
-  const { asService: serviceFields, ...hotelPerNightFields } = rawHotelPerNight;
-  return { ...serviceFields, ...hotelPerNightFields };
+  rawCarRental: CarRentalRawEntity,
+): CarRentalEntity {
+  const { asService: serviceFields, ...carRentalFields } = rawCarRental;
+  return { ...serviceFields, ...carRentalFields };
 }
 
 @Injectable()
-export class HotelsPerNightService {
+export class CarRentalsService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
@@ -62,43 +62,43 @@ export class HotelsPerNightService {
 
   @Transactional()
   async create(
-    createHotelPerNightDto: CreateHotelPerNightDto,
-  ): Promise<HotelPerNightEntity> {
+    createCarRentalDto: CreateCarRentalDto,
+  ): Promise<CarRentalEntity> {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
-        ...createHotelPerNightDto,
+        ...createCarRentalDto,
         serviceType: ServiceType.HOTEL_PER_NIGHT,
-      }), // strip out the HotelPerNight-specific fields
+      }), // strip out the CarRental-specific fields
     );
 
-    const createdHotelPerNight =
-      await this.currentTransaction.hotelPerNight.create({
+    const createdCarRental =
+      await this.currentTransaction.carRental.create({
         data: {
-          ...createHotelPerNightOnlySchema.parse(createHotelPerNightDto), // strip out the Service-specific fields
+          ...createCarRentalOnlySchema.parse(createCarRentalDto), // strip out the Service-specific fields
           id: createdService.id,
         },
-        ...selectHotelPerNightEntityFields,
+        ...selectCarRentalFields,
       });
 
-    return rawEntityToEntity(createdHotelPerNight);
+    return rawEntityToEntity(createdCarRental);
   }
 
   @Transactional()
   async findMany(
     paginationQueryDto: PaginationQueryDto,
-  ): Promise<Page<HotelPerNightEntity>> {
+  ): Promise<Page<CarRentalEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
     const rawHotelsPerNight =
-      await this.currentTransaction.hotelPerNight.findMany({
-        ...selectHotelPerNightEntityFields,
+      await this.currentTransaction.carRental.findMany({
+        ...selectCarRentalFields,
         skip: itemsPerPage * (pageIndex - 1),
         take: itemsPerPage,
       });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
 
-    const itemCount = await this.currentTransaction.hotelPerNight.count();
+    const itemCount = await this.currentTransaction.carRental.count();
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
@@ -112,48 +112,48 @@ export class HotelsPerNightService {
   }
 
   @Transactional()
-  async findOne(id: string): Promise<HotelPerNightEntity | null> {
-    const rawHotelPerNight =
-      await this.currentTransaction.hotelPerNight.findUnique({
+  async findOne(id: string): Promise<CarRentalEntity | null> {
+    const rawCarRental =
+      await this.currentTransaction.carRental.findUnique({
         where: {
           id,
         },
-        ...selectHotelPerNightEntityFields,
+        ...selectCarRentalFields,
       });
-    return rawHotelPerNight ? rawEntityToEntity(rawHotelPerNight) : null;
+    return rawCarRental ? rawEntityToEntity(rawCarRental) : null;
   }
 
   @Transactional()
   async update(
     id: string,
-    updateHotelPerNightDto: UpdateHotelPerNightDto,
-  ): Promise<HotelPerNightEntity> {
+    updateCarRentalDto: UpdateCarRentalDto,
+  ): Promise<CarRentalEntity> {
     const updatedService = await this.servicesService.update(
       id,
-      updateServiceSchema.parse(updateHotelPerNightDto), // strip out the HotelPerNight-specific fields
+      updateServiceSchema.parse(updateCarRentalDto), // strip out the CarRental-specific fields
     );
 
-    const updatedHotelPerNight =
-      await this.currentTransaction.hotelPerNight.update({
+    const updatedCarRental =
+      await this.currentTransaction.carRental.update({
         where: {
           id: updatedService.id,
         },
-        data: updateHotelPerNightOnlySchema.parse(updateHotelPerNightDto), // strip out the Service-specific fields
-        ...selectHotelPerNightEntityFields,
+        data: updateCarRentalOnlySchema.parse(updateCarRentalDto), // strip out the Service-specific fields
+        ...selectCarRentalFields,
       });
 
-    return rawEntityToEntity(updatedHotelPerNight);
+    return rawEntityToEntity(updatedCarRental);
   }
 
   @Transactional()
-  async remove(id: string): Promise<HotelPerNightEntity> {
-    const removedHotelPerNight =
-      await this.currentTransaction.hotelPerNight.delete({
+  async remove(id: string): Promise<CarRentalEntity> {
+    const removedCarRental =
+      await this.currentTransaction.carRental.delete({
         where: {
           id,
         },
-        ...selectHotelPerNightEntityFields,
+        ...selectCarRentalFields,
       });
-    return rawEntityToEntity(removedHotelPerNight);
+    return rawEntityToEntity(removedCarRental);
   }
 }

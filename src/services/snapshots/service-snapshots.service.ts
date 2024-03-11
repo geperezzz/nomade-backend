@@ -5,6 +5,7 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { ServicesService } from '../services.service';
 import { ServiceType } from '../entities/service.entity';
 import { HotelPerNightSnapshotsService } from '../hotels-per-night/snapshots/hotel-per-night-snapshots.service';
+import { CarRentalSnapshotsService } from '../car-rentals/snapshots/car-rental-snapshots.service';
 
 interface SnapshotService {
   createSnapshotOf(serviceId: string): Promise<string>;
@@ -19,9 +20,11 @@ export class ServiceSnapshotsService {
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
     private servicesService: ServicesService,
     private hotelPerNightSnapshotsService: HotelPerNightSnapshotsService,
+    private carRentalSnapshotsService: CarRentalSnapshotsService,
   ) {
-    this.snapshotServices = new Map([
-      [ServiceType.HOTEL_PER_NIGHT, this.hotelPerNightSnapshotsService]
+    this.snapshotServices = new Map<ServiceType, SnapshotService>([
+      [ServiceType.HOTEL_PER_NIGHT, this.hotelPerNightSnapshotsService],
+      [ServiceType.CAR_RENTAL, this.carRentalSnapshotsService],
     ]);
   }
 

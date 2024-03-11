@@ -5,6 +5,6 @@ import {
 
 export type HotelPerNightEntity = Omit<
   ServiceModel,
-  'id' | 'lastUpdateTimestamp' | 'serviceType'
+  'id' | 'serviceType'
 > &
   HotelPerNightModel;
