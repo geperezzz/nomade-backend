@@ -56,6 +56,7 @@ export class StaffOccupationsService {
       .create(employeeId, createStaffOccupationDto);
   }
 
+  @Transactional()
   async findMany(
     employeeId: string,
     paginationQueryDto: PaginationQueryDto,
@@ -86,6 +87,7 @@ export class StaffOccupationsService {
     };
   }
 
+  @Transactional()
   async findOne(
     employeeId: string,
     occupationName: StaffOccupationName
@@ -95,6 +97,7 @@ export class StaffOccupationsService {
       .find(employeeId);
   }
 
+  @Transactional()
   async update(
     employeeId: string,
     occupationName: StaffOccupationName,
@@ -105,6 +108,7 @@ export class StaffOccupationsService {
       .update(employeeId, updateStaffOccupationDto);
   }
   
+  @Transactional()
   async remove(
     employeeId: string,
     occupationNameToRemove: StaffOccupationName,

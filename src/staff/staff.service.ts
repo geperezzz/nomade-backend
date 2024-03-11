@@ -12,7 +12,7 @@ import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { EmployeeEntity } from './entities/employee.entity';
-import { StaffOccupationsService } from './occupations/staff-occupations.service';
+import { StaffOccupationsService } from './staff-occupations/staff-occupations.service';
 
 type EmployeeRawEntity = EmployeeModel;
 
