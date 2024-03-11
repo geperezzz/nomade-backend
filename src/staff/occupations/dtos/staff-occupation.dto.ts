@@ -1,15 +1,20 @@
-import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import { z } from 'nestjs-zod/z';
 
-import { StaffOccupation } from 'src/staff/entities/employee.entity';
 import { StaffOccupationEntity } from '../entities/staff-occupation.entity';
+import { salespersonOccupationSchema } from '../salesperson/schemas/salesperson-occupation.schema';
+import { superAdminOccupationSchema } from '../superadmin/schemas/super-admin-occupation.schema';
+import { adminOccupationSchema } from '../admin/schemas/admin-occupation.schema';
 
-export const staffOccupationSchema = z.object({
-  name: z.nativeEnum(StaffOccupation),
-});
+export const staffOccupationSchema = z.discriminatedUnion('occupationName', [
+  superAdminOccupationSchema,
+  adminOccupationSchema,
+  salespersonOccupationSchema,
+]);
 
-export class StaffOccupationDto extends createZodDto(staffOccupationSchema) {
-  static fromEntity(entity: StaffOccupationEntity) {
+export type StaffOccupationDto = z.infer<typeof staffOccupationSchema>;
+
+export const StaffOccupationDto = {
+  fromEntity(entity: StaffOccupationEntity) {
     return staffOccupationSchema.parse(entity);
   }
 }

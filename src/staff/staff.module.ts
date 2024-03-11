@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 
 import { StaffService } from './staff.service';
 import { StaffController } from './staff.controller';
-import { SalespeopleModule } from './salespeople/salespeople.module';
+import { StaffOccupationsModule } from './occupations/staff-occupations.module';
 
 @Module({
-  imports: [SalespeopleModule],
+  imports: [StaffOccupationsModule],
   controllers: [StaffController],
   providers: [StaffService],
+  exports: [StaffService],
 })
 export class StaffModule {}

@@ -1,6 +1,10 @@
 import { Employee as EmployeeModel, EmployeeOccupation as PrismaEmployeeOccupation } from '@prisma/client';
 
-export type EmployeeEntity = EmployeeModel;
+import { StaffOccupationEntity } from '../occupations/entities/staff-occupation.entity';
 
-export type StaffOccupation = PrismaEmployeeOccupation;
-export const StaffOccupation = PrismaEmployeeOccupation;
+export type EmployeeEntity = Omit<EmployeeModel, 'occupations'> & {
+  occupations: StaffOccupationEntity[];
+};
+
+export type StaffOccupationName = PrismaEmployeeOccupation;
+export const StaffOccupationName = PrismaEmployeeOccupation;

@@ -1,29 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { Employee as EmployeeModel } from '@prisma/client';
 
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { EmployeeEntity } from './entities/employee.entity';
+import { StaffOccupationsService } from './occupations/staff-occupations.service';
+
+type EmployeeRawEntity = EmployeeModel;
 
 @Injectable()
 export class StaffService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    private staffOccupationsService: StaffOccupationsService,
   ) {}
 
   @Transactional()
   async create(createEmployeeDto: CreateEmployeeDto): Promise<EmployeeEntity> {
-    return await this.currentTransaction.employee.create({
+    const createdEmployee = await this.currentTransaction.employee.create({
       data: createEmployeeDto,
     });
+
+    return await this.rawEntityToEntity(createdEmployee);
   }
 
   @Transactional()
@@ -33,13 +40,14 @@ export class StaffService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const items = await this.currentTransaction.employee.findMany({
+    const rawStaff = await this.currentTransaction.employee.findMany({
       where: {
         deletedAt: null,
       },
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
+    const items = await Promise.all(rawStaff.map(rawEmployee => this.rawEntityToEntity(rawEmployee)));
 
     const itemCount = await this.currentTransaction.employee.count({
       where: {
@@ -60,12 +68,14 @@ export class StaffService {
 
   @Transactional()
   async findOne(id: string): Promise<EmployeeEntity | null> {
-    return await this.currentTransaction.employee.findUnique({
+    const rawEmployee = await this.currentTransaction.employee.findUnique({
       where: {
         id,
         deletedAt: null,
       },
     });
+
+    return rawEmployee ? await this.rawEntityToEntity(rawEmployee) : null;
   }
 
   @Transactional()
@@ -73,18 +83,20 @@ export class StaffService {
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<EmployeeEntity> {
-    return await this.currentTransaction.employee.update({
+    const updatedEmployee = await this.currentTransaction.employee.update({
       where: {
         id,
         deletedAt: null,
       },
       data: updateEmployeeDto,
     });
+
+    return await this.rawEntityToEntity(updatedEmployee);
   }
 
   @Transactional()
   async remove(id: string): Promise<EmployeeEntity> {
-    return await this.currentTransaction.employee.update({
+    const removedEmployee = await this.currentTransaction.employee.update({
       where: {
         id,
         deletedAt: null,
@@ -93,5 +105,23 @@ export class StaffService {
         deletedAt: new Date(),
       },
     });
+
+    return await this.rawEntityToEntity(removedEmployee);
+  }
+
+  @Transactional()
+  private async rawEntityToEntity(
+    rawEmployee: EmployeeRawEntity,
+  ): Promise<EmployeeEntity> {
+    const occupations = await Promise.all(
+      rawEmployee.occupations.map(async (occupationName) =>
+        (await this.staffOccupationsService.findOne(rawEmployee.id, occupationName))!
+      )
+    );
+
+    return {
+      ...rawEmployee,
+      occupations,
+    };
   }
 }
