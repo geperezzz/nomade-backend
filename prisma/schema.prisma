@@ -223,7 +223,7 @@ model TrainTicket {
   asService             Service        @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   id                    String         @id @default(uuid()) @db.Uuid
   arrivalLocation       String
-  arrivalTimestamp      String
+  arrivalTimestamp      DateTime
   trainOperatingCompany String
   assignedCabinType     TrainCabinType
 }
@@ -336,7 +336,7 @@ model TrainTicketSnapshot {
   asService             ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   id                    String          @id @default(uuid()) @db.Uuid
   arrivalLocation       String
-  arrivalTimestamp      String
+  arrivalTimestamp      DateTime
   trainOperatingCompany String
   assignedCabinType     TrainCabinType
 }
