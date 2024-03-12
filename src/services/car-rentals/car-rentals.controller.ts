@@ -22,13 +22,13 @@ import { Page } from 'src/common/pagination/page.type';
 @Controller('services/car-rentals')
 @ApiTags('Car rentals')
 export class CarRentalsController {
-  constructor(private readonly hotelsPerNightService: CarRentalsService) {}
+  constructor(private readonly carRentalsService: CarRentalsService) {}
 
   @Post()
   async create(
     @Body() createCarRentalDto: CreateCarRentalDto,
   ): Promise<CarRentalDto> {
-    const createdCarRental = await this.hotelsPerNightService.create(
+    const createdCarRental = await this.carRentalsService.create(
       createCarRentalDto,
     );
     return CarRentalDto.fromEntity(createdCarRental);
@@ -39,7 +39,7 @@ export class CarRentalsController {
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<CarRentalDto>> {
     const foundHotelsPerNightPage =
-      await this.hotelsPerNightService.findMany(paginationQueryDto);
+      await this.carRentalsService.findMany(paginationQueryDto);
     const items = foundHotelsPerNightPage.items.map(
       CarRentalDto.fromEntity,
     );
@@ -51,12 +51,12 @@ export class CarRentalsController {
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CarRentalDto> {
-    const foundCarRental = await this.hotelsPerNightService.findOne(id);
+    const foundCarRental = await this.carRentalsService.findOne(id);
 
     if (!foundCarRental) {
       throw new NotFoundException(
-        'Hotel per night service not found',
-        `There is no hotel per night service with ID ${id}`,
+        'Car rental service not found',
+        `There is no car rental service with ID ${id}`,
       );
     }
     return CarRentalDto.fromEntity(foundCarRental);
@@ -67,7 +67,7 @@ export class CarRentalsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCarRentalDto: UpdateCarRentalDto,
   ): Promise<CarRentalDto> {
-    const updatedCarRental = await this.hotelsPerNightService.update(
+    const updatedCarRental = await this.carRentalsService.update(
       id,
       updateCarRentalDto,
     );
@@ -78,7 +78,7 @@ export class CarRentalsController {
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CarRentalDto> {
-    const removedCarRental = await this.hotelsPerNightService.remove(id);
+    const removedCarRental = await this.carRentalsService.remove(id);
     return CarRentalDto.fromEntity(removedCarRental);
   }
 }
