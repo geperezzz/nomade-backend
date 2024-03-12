@@ -38,13 +38,13 @@ export class BusTicketsController {
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<BusTicketDto>> {
-    const foundHotelsPerNightPage =
+    const foundBusTicketsPage =
       await this.busTicketsService.findMany(paginationQueryDto);
-    const items = foundHotelsPerNightPage.items.map(
+    const items = foundBusTicketsPage.items.map(
       BusTicketDto.fromEntity,
     );
 
-    return { ...foundHotelsPerNightPage, items };
+    return { ...foundBusTicketsPage, items };
   }
 
   @Get(':id')

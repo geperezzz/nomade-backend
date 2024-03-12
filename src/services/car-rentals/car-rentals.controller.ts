@@ -38,13 +38,13 @@ export class CarRentalsController {
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<CarRentalDto>> {
-    const foundHotelsPerNightPage =
+    const foundCarRentalsPage =
       await this.carRentalsService.findMany(paginationQueryDto);
-    const items = foundHotelsPerNightPage.items.map(
+    const items = foundCarRentalsPage.items.map(
       CarRentalDto.fromEntity,
     );
 
-    return { ...foundHotelsPerNightPage, items };
+    return { ...foundCarRentalsPage, items };
   }
 
   @Get(':id')

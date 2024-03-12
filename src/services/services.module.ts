@@ -6,12 +6,14 @@ import { PackagesModule } from 'src/packages/packages.module';
 import { ServicesController } from './services.controller';
 import { CarRentalsModule } from './car-rentals/car-rentals.module';
 import { BusTicketsModule } from './bus-tickets/bus-tickets.module';
+import { AirlineTicketsModule } from './airline-tickets/airline-tickets.module';
 
 @Module({
   imports: [
     forwardRef(() => HotelsPerNightModule),
     forwardRef(() => CarRentalsModule),
     forwardRef(() => BusTicketsModule),
+    forwardRef(() => AirlineTicketsModule),
     PackagesModule
   ],
   controllers: [ServicesController],

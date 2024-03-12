@@ -211,6 +211,7 @@ model AirlineTicket {
   arrivalTimestamp  DateTime
   airline           String
   assignedCabinType AirplaneCabinType
+  hasStopover       Boolean
 }
 
 enum AirplaneCabinType {

@@ -7,6 +7,7 @@ import { ServiceType } from '../entities/service.entity';
 import { HotelPerNightSnapshotsService } from '../hotels-per-night/snapshots/hotel-per-night-snapshots.service';
 import { CarRentalSnapshotsService } from '../car-rentals/snapshots/car-rental-snapshots.service';
 import { BusTicketSnapshotsService } from '../bus-tickets/snapshots/bus-ticket-snapshots.service';
+import { AirlineTicketSnapshotsService } from '../airline-tickets/snapshots/airline-ticket-snapshots.service';
 
 interface SnapshotService {
   createSnapshotOf(serviceId: string): Promise<string>;
@@ -23,11 +24,13 @@ export class ServiceSnapshotsService {
     private hotelPerNightSnapshotsService: HotelPerNightSnapshotsService,
     private carRentalSnapshotsService: CarRentalSnapshotsService,
     private busTicketSnapshotsService: BusTicketSnapshotsService,
+    private airlineTicketSnapshotsService: AirlineTicketSnapshotsService
   ) {
     this.snapshotServices = new Map<ServiceType, SnapshotService>([
       [ServiceType.HOTEL_PER_NIGHT, this.hotelPerNightSnapshotsService],
       [ServiceType.CAR_RENTAL, this.carRentalSnapshotsService],
       [ServiceType.BUS_TICKET, this.busTicketSnapshotsService],
+      [ServiceType.AIRLINE_TICKET, this.airlineTicketSnapshotsService],
     ]);
   }
 
