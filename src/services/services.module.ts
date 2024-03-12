@@ -7,6 +7,8 @@ import { ServicesController } from './services.controller';
 import { CarRentalsModule } from './car-rentals/car-rentals.module';
 import { BusTicketsModule } from './bus-tickets/bus-tickets.module';
 import { AirlineTicketsModule } from './airline-tickets/airline-tickets.module';
+import { ToursModule } from './tours/tours.module';
+import { TrainTicketsModule } from './train-tickets/train-tickets.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { AirlineTicketsModule } from './airline-tickets/airline-tickets.module';
     forwardRef(() => CarRentalsModule),
     forwardRef(() => BusTicketsModule),
     forwardRef(() => AirlineTicketsModule),
+    forwardRef(() => TrainTicketsModule),
+    forwardRef(() => ToursModule),
     PackagesModule
   ],
   controllers: [ServicesController],

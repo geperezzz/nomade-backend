@@ -234,17 +234,17 @@ enum TrainCabinType {
 }
 
 model Tour {
-  asService        Service @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  id               String  @id @default(uuid()) @db.Uuid
-  tourType         String
-  durationInterval String
+  asService          Service  @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                 String   @id @default(uuid()) @db.Uuid
+  tourType           String
+  endOfTourTimestamp DateTime
 }
 
 model Event {
-  asService        Service @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  id               String  @id @default(uuid()) @db.Uuid
-  eventType        String
-  durationInterval String
+  asService           Service  @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                  String   @id @default(uuid()) @db.Uuid
+  eventType           String
+  endOfEventTimestamp DateTime
 }
 
 model PackageSnapshot {
@@ -342,15 +342,15 @@ model TrainTicketSnapshot {
 }
 
 model TourSnapshot {
-  asService        ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  id               String          @id @default(uuid()) @db.Uuid
-  tourType         String
-  durationInterval String
+  asService          ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                 String          @id @default(uuid()) @db.Uuid
+  tourType           String
+  endOfTourTimestamp DateTime
 }
 
 model EventSnapshot {
-  asService        ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  id               String          @id @default(uuid()) @db.Uuid
-  eventType        String
-  durationInterval String
+  asService           ServiceSnapshot @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                  String          @id @default(uuid()) @db.Uuid
+  eventType           String
+  endOfEventTimestamp DateTime
 }
