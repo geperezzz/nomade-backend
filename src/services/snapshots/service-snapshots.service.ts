@@ -10,6 +10,7 @@ import { BusTicketSnapshotsService } from '../bus-tickets/snapshots/bus-ticket-s
 import { AirlineTicketSnapshotsService } from '../airline-tickets/snapshots/airline-ticket-snapshots.service';
 import { TrainTicketSnapshotsService } from '../train-tickets/snapshots/train-ticket-snapshots.service';
 import { TourSnapshotsService } from '../tours/snapshots/tour-snapshots.service';
+import { EventSnapshotsService } from '../events/snapshots/tour-snapshots.service';
 
 interface SnapshotService {
   createSnapshotOf(serviceId: string): Promise<string>;
@@ -29,6 +30,7 @@ export class ServiceSnapshotsService {
     private airlineTicketSnapshotsService: AirlineTicketSnapshotsService,
     private trainTicketSnapshotsService: TrainTicketSnapshotsService,
     private tourSnapshotsService: TourSnapshotsService,
+    private eventSnapshotService: EventSnapshotsService,
   ) {
     this.snapshotServices = new Map<ServiceType, SnapshotService>([
       [ServiceType.HOTEL_PER_NIGHT, this.hotelPerNightSnapshotsService],
@@ -37,6 +39,7 @@ export class ServiceSnapshotsService {
       [ServiceType.AIRLINE_TICKET, this.airlineTicketSnapshotsService],
       [ServiceType.TRAIN_TICKET, this.trainTicketSnapshotsService],
       [ServiceType.TOUR, this.tourSnapshotsService],
+      [ServiceType.EVENT, this.eventSnapshotService],
     ]);
   }
 

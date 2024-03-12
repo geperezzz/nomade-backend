@@ -8,6 +8,7 @@ import { BusTicketSnapshotsModule } from '../bus-tickets/snapshots/bus-ticket-sn
 import { AirlineTicketSnapshotsModule } from '../airline-tickets/snapshots/airline-ticket-snapshots.module';
 import { TrainTicketSnapshotsModule } from '../train-tickets/snapshots/train-ticket-snapshots.module';
 import { TourSnapshotsModule } from '../tours/snapshots/tour-snapshots.module';
+import { EventSnapshotsModule } from '../events/snapshots/event-snapshots.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TourSnapshotsModule } from '../tours/snapshots/tour-snapshots.module';
     AirlineTicketSnapshotsModule,
     TrainTicketSnapshotsModule,
     TourSnapshotsModule,
+    EventSnapshotsModule,
   ],
   providers: [ServiceSnapshotsService],
   exports: [ServiceSnapshotsService],
