@@ -85,6 +85,16 @@ export class OrderPaymentsService {
   }
 
   @Transactional()
+  async findAll(orderId: string): Promise<OrderPaymentEntity[]> {
+    return await this.currentTransaction.payment.findMany({
+      where: {
+        orderId,
+      },
+      ...selectOrderPaymentEntityFields,
+    });
+  }
+
+  @Transactional()
   async findOne(orderId: string, paymentNumber: number): Promise<OrderPaymentEntity | null> {
     return await this.currentTransaction.payment.findUnique({
       where: {

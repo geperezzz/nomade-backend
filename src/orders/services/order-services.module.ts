@@ -12,5 +12,6 @@ import { ServiceSnapshotsModule } from 'src/services/snapshots/service-snapshots
   ],
   controllers: [OrderServicesController],
   providers: [OrderServicesService],
+  exports: [OrderServicesService],
 })
 export class OrderServicesModule {}

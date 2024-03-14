@@ -5,7 +5,8 @@ import { OrderPackageEntity } from '../entities/order-package.entity';
 import { packageSchema } from 'src/packages/dtos/package.dto';
 
 export const orderPackageSchema = z.object({
-  packageId: packageSchema.shape.id,
+  packageId: packageSchema.shape.id.optional(),
+  packageSnapshotId: z.string().uuid(),
   amountOrdered: z.coerce.number().positive(),
 });
 

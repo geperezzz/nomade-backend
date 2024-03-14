@@ -96,7 +96,12 @@ export class StaffService {
 
   @Transactional()
   async remove(id: string): Promise<EmployeeEntity> {
-    const removedEmployee = await this.currentTransaction.employee.update({
+    const removedEmployee = await this.findOne(id);
+    if (!removedEmployee) {
+      throw new Error(`Employee not found: There is no employee with ID ${id}`);
+    }
+    
+    const { deletedAt } = await this.currentTransaction.employee.update({
       where: {
         id,
         deletedAt: null,
@@ -104,9 +109,12 @@ export class StaffService {
       data: {
         deletedAt: new Date(),
       },
+      select: {
+        deletedAt: true,
+      }
     });
 
-    return await this.rawEntityToEntity(removedEmployee);
+    return { ...removedEmployee, deletedAt };
   }
 
   @Transactional()

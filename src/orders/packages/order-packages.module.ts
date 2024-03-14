@@ -12,5 +12,6 @@ import { PackageSnapshotsModule } from 'src/packages/snapshots/package-snapshots
   ],
   controllers: [OrderPackagesController],
   providers: [OrderPackagesService],
+  exports: [OrderPackagesService],
 })
 export class OrderPackagesModule {}

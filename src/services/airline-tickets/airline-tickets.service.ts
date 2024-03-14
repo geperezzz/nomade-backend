@@ -67,7 +67,7 @@ export class AirlineTicketsService {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createAirlineTicketDto,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
+        serviceType: ServiceType.AIRLINE_TICKET,
       }), // strip out the AirlineTicket-specific fields
     );
 

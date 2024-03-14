@@ -67,7 +67,7 @@ export class BusTicketsService {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createBusTicketDto,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
+        serviceType: ServiceType.BUS_TICKET,
       }), // strip out the BusTicket-specific fields
     );
 

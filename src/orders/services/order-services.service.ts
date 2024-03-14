@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { OrderService as OrderServiceModel } from '@prisma/client';
 
 import { CreateOrderServiceDto } from './dtos/create-order-service.dto';
 import { UpdateOrderServiceDto } from './dtos/update-order-service.dto';
@@ -16,34 +17,72 @@ import { ServiceSnapshotsService } from 'src/services/snapshots/service-snapshot
 
 const selectOrderServiceEntityFields = {
   select: {
-    serviceId: true,
+    serviceSnapshot: {
+      select: {
+        id: true,
+        originalServiceId: true,
+      }
+    },
     amountOrdered: true,
   },
 } as const;
+
+type OrderServiceRawEntity = Omit<OrderServiceModel, 'orderId' | 'serviceSnapshotId'> & {
+  serviceSnapshot: {
+    id: string,
+    originalServiceId: string | null,
+  }
+};
+
+function rawEntityToEntity(rawOrderService: OrderServiceRawEntity): OrderServiceEntity {
+  const { serviceSnapshot, ...restOfOrderServiceFields } = rawOrderService;
+  
+  return {
+    ...restOfOrderServiceFields,
+    serviceId: serviceSnapshot.originalServiceId,
+    serviceSnapshotId: serviceSnapshot.id,
+  };
+}
 
 @Injectable()
 export class OrderServicesService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    @Inject(forwardRef(() => OrdersService))
     private ordersService: OrdersService,
     private serviceSnapshotsService: ServiceSnapshotsService,
   ) {}
 
   @Transactional()
   async create(orderId: string, createOrderServiceDto: CreateOrderServiceDto): Promise<OrderServiceEntity> {
-    const createdOrderService = await this.currentTransaction.orderService.create({
-      data: {
-        ...createOrderServiceDto,
-        orderId,
-        serviceId: await this.serviceSnapshotsService.pickLatestSnapshotOf(createOrderServiceDto.serviceId),
-      },
-      ...selectOrderServiceEntityFields,
-    });
+    const [createdOrderService] = await this.createMany(orderId, [createOrderServiceDto]);
+    return createdOrderService;
+  }
+
+  @Transactional()
+  async createMany(orderId: string, createOrderServiceDtos: CreateOrderServiceDto[]): Promise<OrderServiceEntity[]> {
+    const createdOrderServices = await Promise.all(
+      createOrderServiceDtos.map(async (createOrderServiceDto) => {
+        const serviceSnapshotId = createOrderServiceDto.serviceSnapshotId
+          ?? await this.serviceSnapshotsService.pickLatestSnapshotOf(createOrderServiceDto.serviceId);
+        
+        const createdOrderService = await this.currentTransaction.orderService.create({
+          data: {
+            amountOrdered: createOrderServiceDto.amountOrdered,
+            orderId,
+            serviceSnapshotId,
+          },
+          ...selectOrderServiceEntityFields,
+        });
+
+        return rawEntityToEntity(createdOrderService);
+      })
+    );
 
     await this.ordersService.updateOrderPrice(orderId);
 
-    return createdOrderService;
+    return createdOrderServices;
   }
 
   @Transactional()
@@ -54,7 +93,7 @@ export class OrderServicesService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const items = await this.currentTransaction.orderService.findMany({
+    const rawOrderServices = await this.currentTransaction.orderService.findMany({
       where: {
         orderId,
       },
@@ -62,6 +101,7 @@ export class OrderServicesService {
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
+    const items = rawOrderServices.map(rawEntityToEntity);
 
     const itemCount = await this.currentTransaction.orderService.count({
       where: {
@@ -81,16 +121,28 @@ export class OrderServicesService {
   }
 
   @Transactional()
-  async findOne(orderId: string, serviceId: string): Promise<OrderServiceEntity | null> {
-    return await this.currentTransaction.orderService.findFirst({
+  async findAll(orderId: string): Promise<OrderServiceEntity[]> {
+    const rawOrderServices = await this.currentTransaction.orderService.findMany({
       where: {
         orderId,
-        service: {
+      },
+      ...selectOrderServiceEntityFields,
+    });
+    return rawOrderServices.map(rawEntityToEntity);
+  }
+
+  @Transactional()
+  async findOne(orderId: string, serviceId: string): Promise<OrderServiceEntity | null> {
+    const rawOrderService = await this.currentTransaction.orderService.findFirst({
+      where: {
+        orderId,
+        serviceSnapshot: {
           originalServiceId: serviceId,
         },
       },
       ...selectOrderServiceEntityFields,
     });
+    return rawOrderService ? rawEntityToEntity(rawOrderService) : null;
   }
 
   @Transactional()
@@ -99,34 +151,29 @@ export class OrderServicesService {
     serviceId: string,
     updateOrderServiceDto: UpdateOrderServiceDto,
   ): Promise<OrderServiceEntity> {
-    let updatedServiceId!: string;
+    let newServiceId = serviceId;
+    let newServiceSnapshotId = updateOrderServiceDto.serviceSnapshotId;
     if (updateOrderServiceDto.serviceId) {
-      updatedServiceId = await this.serviceSnapshotsService.pickLatestSnapshotOf(updateOrderServiceDto.serviceId);
-    } else {
-      updatedServiceId = serviceId;
+      newServiceId = updateOrderServiceDto.serviceId;
+      newServiceSnapshotId ??= await this.serviceSnapshotsService.pickLatestSnapshotOf(updateOrderServiceDto.serviceId);
     }
     
     await this.currentTransaction.orderService.updateMany({
       where: {
         orderId,
-        service: {
+        serviceSnapshot: {
           originalServiceId: serviceId,
         },
       },
       data: {
-        ...updateOrderServiceDto,
-        serviceId: updatedServiceId,
+        serviceSnapshotId: newServiceSnapshotId,
+        amountOrdered: updateOrderServiceDto.amountOrdered,
       },
     });
 
     await this.ordersService.updateOrderPrice(orderId);
 
-    const updatedOrderService = await this.findOne(orderId, updatedServiceId);
-    if (!updatedOrderService) {
-      throw new Error(
-        `Order package not found: There is no Order with ID ${orderId} that has a Service with ID ${updatedServiceId}`
-      );
-    }
+    const updatedOrderService = (await this.findOne(orderId, newServiceId)) as OrderServiceEntity;
     return updatedOrderService;
   }
 
@@ -142,7 +189,7 @@ export class OrderServicesService {
     await this.currentTransaction.orderService.deleteMany({
       where: {
         orderId,
-        service: {
+        serviceSnapshot: {
           originalServiceId: serviceId,
         },
       },

@@ -10,7 +10,7 @@ import { BusTicketSnapshotsService } from '../bus-tickets/snapshots/bus-ticket-s
 import { AirlineTicketSnapshotsService } from '../airline-tickets/snapshots/airline-ticket-snapshots.service';
 import { TrainTicketSnapshotsService } from '../train-tickets/snapshots/train-ticket-snapshots.service';
 import { TourSnapshotsService } from '../tours/snapshots/tour-snapshots.service';
-import { EventSnapshotsService } from '../events/snapshots/tour-snapshots.service';
+import { EventSnapshotsService } from '../events/snapshots/event-snapshots.service';
 
 interface SnapshotService {
   createSnapshotOf(serviceId: string): Promise<string>;

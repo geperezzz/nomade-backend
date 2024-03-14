@@ -67,7 +67,7 @@ export class ToursService {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createTourDto,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
+        serviceType: ServiceType.TOUR,
       }), // strip out the Tour-specific fields
     );
 

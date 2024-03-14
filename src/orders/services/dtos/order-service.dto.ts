@@ -5,7 +5,8 @@ import { OrderServiceEntity } from '../entities/order-service.entity';
 import { serviceSchema } from 'src/services/dtos/service.dto';
 
 export const orderServiceSchema = z.object({
-  serviceId: serviceSchema.shape.id,
+  serviceId: serviceSchema.shape.id.optional(),
+  serviceSnapshotId: z.string().uuid(),
   amountOrdered: z.coerce.number().positive(),
 });
 

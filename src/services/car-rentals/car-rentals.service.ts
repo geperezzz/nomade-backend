@@ -67,7 +67,7 @@ export class CarRentalsService {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createCarRentalDto,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
+        serviceType: ServiceType.CAR_RENTAL,
       }), // strip out the CarRental-specific fields
     );
 

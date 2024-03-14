@@ -67,7 +67,7 @@ export class EventsService {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createEventDto,
-        serviceType: ServiceType.HOTEL_PER_NIGHT,
+        serviceType: ServiceType.EVENT,
       }), // strip out the Event-specific fields
     );
 

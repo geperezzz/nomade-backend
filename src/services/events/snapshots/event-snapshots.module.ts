@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { EventSnapshotsService } from './tour-snapshots.service';
+import { EventSnapshotsService } from './event-snapshots.service';
 import { EventsModule } from '../events.module';
 
 @Module({

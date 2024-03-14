@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 
 import { TrainTicketsService } from './train-tickets.service';
-import { TrainTicketsController } from './bus-tickets.controller';
+import { TrainTicketsController } from './train-tickets.controller';
 import { ServicesModule } from '../services.module';
 
 @Module({

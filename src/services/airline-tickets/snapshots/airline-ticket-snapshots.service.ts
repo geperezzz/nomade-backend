@@ -9,6 +9,7 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { AirlineTicketsService } from '../airline-tickets.service';
 import { serviceSchema } from 'src/services/dtos/service.dto';
 import { airlineTicketOnlySchema } from '../dtos/airline-ticket.dto';
+import { ServiceType } from 'src/services/entities/service.entity';
 
 @Injectable()
 export class AirlineTicketSnapshotsService {
@@ -29,7 +30,8 @@ export class AirlineTicketSnapshotsService {
 
     const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
       data: {
-        ...serviceSchema.omit({ id: true }).parse(originalAirlineTicket),
+        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalAirlineTicket),
+        serviceType: ServiceType.AIRLINE_TICKET,
         originalServiceId: originalAirlineTicket.id,
       },
       select: {
@@ -42,7 +44,6 @@ export class AirlineTicketSnapshotsService {
         ...airlineTicketOnlySchema.parse(originalAirlineTicket),
         id: snapshotId,
       },
-      select: {},
     });
 
     return snapshotId;

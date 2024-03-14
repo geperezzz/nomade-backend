@@ -69,23 +69,23 @@ model Order {
 }
 
 model OrderPackage {
-  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  orderId       String          @db.Uuid
-  package       PackageSnapshot @relation(fields: [packageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  packageId     String          @db.Uuid
-  amountOrdered Int
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId           String          @db.Uuid
+  packageSnapshot   PackageSnapshot @relation(fields: [packageSnapshotId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  packageSnapshotId String          @db.Uuid
+  amountOrdered     Int
 
-  @@id([orderId, packageId])
+  @@id([orderId, packageSnapshotId])
 }
 
 model OrderService {
-  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  orderId       String          @db.Uuid
-  service       ServiceSnapshot @relation(fields: [serviceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  serviceId     String          @db.Uuid
-  amountOrdered Int
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId           String          @db.Uuid
+  serviceSnapshot   ServiceSnapshot @relation(fields: [serviceSnapshotId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  serviceSnapshotId String          @db.Uuid
+  amountOrdered     Int
 
-  @@id([orderId, serviceId])
+  @@id([orderId, serviceSnapshotId])
 }
 
 model Payment {

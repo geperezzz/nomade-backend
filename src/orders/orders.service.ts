@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
@@ -6,85 +6,56 @@ import {
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import Decimal from 'decimal.js';
+import { Order as OrderModel } from '@prisma/client';
 
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { OrderEntity } from './entities/order.entity';
-import { PackageSnapshotsService } from 'src/packages/snapshots/package-snapshots.service';
-import { ServiceSnapshotsService } from 'src/services/snapshots/service-snapshots.service';
+import { OrderPackagesService } from './packages/order-packages.service';
+import { OrderServicesService } from './services/order-services.service';
+import { OrderPaymentsService } from './payments/order-payments.service';
 
-const selectOrderEntityFields = {
-  include: {
-    orderedPackages: {
-      select: {
-        packageId: true,
-        amountOrdered: true,
-      },
-    },
-    orderedServices: {
-      select: {
-        serviceId: true,
-        amountOrdered: true,
-      },
-    },
-    payments: {
-      select: {
-        paymentNumber: true,
-        paymentTimestamp: true,
-        netAmountPaid: true,
-        amountWithCommissionPaid: true,
-        appliedCommissionPercentage: true,
-        paymentMethodId: true,
-      },
-    },
-  },
-} as const;
+type OrderRawEntity = OrderModel;
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
-    private packageSnapshotsService: PackageSnapshotsService,
-    private serviceSnapshotsService: ServiceSnapshotsService,
+    @Inject(forwardRef(() => OrderPackagesService))
+    private orderPackagesService: OrderPackagesService,
+    @Inject(forwardRef(() => OrderServicesService))
+    private orderServicesService: OrderServicesService,
+    @Inject(forwardRef(() => OrderPaymentsService))
+    private orderPaymentsService: OrderPaymentsService,
   ) {}
 
   @Transactional()
   async create(createOrderDto: CreateOrderDto): Promise<OrderEntity> {
-    const orderedPackagesAsSnapshots = await Promise.all(
-      createOrderDto.orderedPackages.map(
-        async ({ packageId, amountOrdered }) => ({
-          packageId: await this.packageSnapshotsService.pickLatestSnapshotOf(packageId),
-          amountOrdered,
-        })
-      )
-    );
-
-    const orderedServicesAsSnapshots = await Promise.all(
-      createOrderDto.orderedServices.map(
-        async ({ serviceId, amountOrdered }) => ({
-          serviceId: await this.serviceSnapshotsService.pickLatestSnapshotOf(serviceId),
-          amountOrdered,
-        })
-      )
-    );
-    
     const { id: createdId } = await this.currentTransaction.order.create({
       data: {
         ...createOrderDto,
-        orderedPackages: {
-          create: orderedPackagesAsSnapshots,
-        },
-        orderedServices: {
-          create: orderedServicesAsSnapshots,
-        },
+        orderedPackages: undefined,
+        orderedServices: undefined,
       },
       select: {
         id: true,
       },
     });
+    
+    await Promise.all(
+      createOrderDto.orderedPackages.map(
+        createOrderPackageDto => this.orderPackagesService.create(createdId, createOrderPackageDto)
+      )
+    );
+
+    await Promise.all(
+      createOrderDto.orderedServices.map(
+        createOrderServiceDto => this.orderServicesService.create(createdId, createOrderServiceDto)
+      )
+    );
 
     return await this.updateOrderPrice(createdId);
   }
@@ -98,7 +69,7 @@ export class OrdersService {
       select: {
         orderedPackages: {
           select: {
-            package: {
+            packageSnapshot: {
               select: {
                 price: true,
               }
@@ -108,7 +79,7 @@ export class OrdersService {
         },
         orderedServices: {
           select: {
-            service: {
+            serviceSnapshot: {
               select: {
                 servicePrice: true,
               }
@@ -120,7 +91,7 @@ export class OrdersService {
     });
 
     const packagesPrice = order.orderedPackages.reduce(
-      (accumulatedPrice, { package: currentPackage, amountOrdered }) =>
+      (accumulatedPrice, { packageSnapshot: currentPackage, amountOrdered }) =>
         accumulatedPrice.add(
           currentPackage.price.mul(amountOrdered)
         ),
@@ -128,7 +99,7 @@ export class OrdersService {
     );
 
     const servicesPrice = order.orderedServices.reduce(
-      (accumulatedPrice, { service: currentService, amountOrdered }) =>
+      (accumulatedPrice, { serviceSnapshot: currentService, amountOrdered }) =>
         accumulatedPrice.add(
           currentService.servicePrice.mul(amountOrdered)
         ),
@@ -137,15 +108,15 @@ export class OrdersService {
 
     const totalPrice = packagesPrice.add(servicesPrice);
 
-    return await this.currentTransaction.order.update({
+    const updatedOrder = await this.currentTransaction.order.update({
       where: {
         id,
       },
       data: {
         price: totalPrice,
       },
-      ...selectOrderEntityFields,
     });
+    return await this.rawEntityToEntity(updatedOrder);
   }
 
   @Transactional()
@@ -155,11 +126,13 @@ export class OrdersService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const items = await this.currentTransaction.order.findMany({
-      ...selectOrderEntityFields,
+    const rawOrders = await this.currentTransaction.order.findMany({
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
+    const items = await Promise.all(
+      rawOrders.map(rawOrder => this.rawEntityToEntity(rawOrder))
+    );
 
     const itemCount = await this.currentTransaction.order.count();
 
@@ -176,12 +149,12 @@ export class OrdersService {
 
   @Transactional()
   async findOne(id: string): Promise<OrderEntity | null> {
-    return await this.currentTransaction.order.findUnique({
+    const rawOrder = await this.currentTransaction.order.findUnique({
       where: {
         id,
       },
-      ...selectOrderEntityFields,
     });
+    return rawOrder ? await this.rawEntityToEntity(rawOrder) : null;
   }
 
   @Transactional()
@@ -189,22 +162,65 @@ export class OrdersService {
     id: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<OrderEntity> {
-    return await this.currentTransaction.order.update({
+    if (updateOrderDto.orderedPackages) {
+      await this.currentTransaction.orderPackage.deleteMany({
+        where: {
+          orderId: id,
+        },
+      });
+      await this.orderPackagesService.createMany(id, updateOrderDto.orderedPackages);
+    }
+
+    if (updateOrderDto.orderedServices) {
+      await this.currentTransaction.orderService.deleteMany({
+        where: {
+          orderId: id,
+        },
+      });
+      await this.orderServicesService.createMany(id, updateOrderDto.orderedServices);
+    }
+    
+    const updatedOrder = await this.currentTransaction.order.update({
       where: {
         id,
       },
-      data: updateOrderDto,
-      ...selectOrderEntityFields,
+      data: {
+        ...updateOrderDto,
+        orderedPackages: undefined,
+        orderedServices: undefined,
+      },
     });
+
+    return await this.rawEntityToEntity(updatedOrder);
   }
 
   @Transactional()
   async remove(id: string): Promise<OrderEntity> {
-    return await this.currentTransaction.order.delete({
+    const removedOrder = await this.currentTransaction.order.delete({
       where: {
         id,
       },
-      ...selectOrderEntityFields,
     });
+    return await this.rawEntityToEntity(removedOrder);
+  }
+
+  @Transactional()
+  async rawEntityToEntity(rawOrder: OrderRawEntity): Promise<OrderEntity> {
+    const [
+      orderedPackages,
+      orderedServices,
+      payments,
+    ] = await Promise.all([
+      this.orderPackagesService.findAll(rawOrder.id),
+      this.orderServicesService.findAll(rawOrder.id),
+      this.orderPaymentsService.findAll(rawOrder.id),
+    ]);
+    
+    return {
+      ...rawOrder,
+      orderedPackages,
+      orderedServices,
+      payments,
+    };
   }
 }

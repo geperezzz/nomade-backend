@@ -9,6 +9,7 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { HotelsPerNightService } from '../hotels-per-night.service';
 import { serviceSchema } from 'src/services/dtos/service.dto';
 import { hotelPerNightOnlySchema } from '../dtos/hotel-per-night.dto';
+import { ServiceType } from 'src/services/entities/service.entity';
 
 @Injectable()
 export class HotelPerNightSnapshotsService {
@@ -29,7 +30,8 @@ export class HotelPerNightSnapshotsService {
 
     const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
       data: {
-        ...serviceSchema.omit({ id: true }).parse(originalHotelPerNight),
+        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalHotelPerNight),
+        serviceType: ServiceType.HOTEL_PER_NIGHT,
         originalServiceId: originalHotelPerNight.id,
       },
       select: {
@@ -42,7 +44,6 @@ export class HotelPerNightSnapshotsService {
         ...hotelPerNightOnlySchema.parse(originalHotelPerNight),
         id: snapshotId,
       },
-      select: {},
     });
 
     return snapshotId;

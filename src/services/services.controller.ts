@@ -19,12 +19,12 @@ export class ServicesController {
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<ServiceDto>> {
-    const foundHotelsPerNightPage =
+    const foundServicesPage =
       await this.servicesService.findMany(paginationQueryDto);
-    const items = foundHotelsPerNightPage.items.map(
+    const items = foundServicesPage.items.map(
       ServiceDto.fromEntity,
     );
 
-    return { ...foundHotelsPerNightPage, items };
+    return { ...foundServicesPage, items };
   }
 }

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { OrderPackage as OrderPackageModel } from '@prisma/client';
 
 import { CreateOrderPackageDto } from './dtos/create-order-package.dto';
 import { UpdateOrderPackageDto } from './dtos/update-order-package.dto';
@@ -16,34 +17,72 @@ import { PackageSnapshotsService } from 'src/packages/snapshots/package-snapshot
 
 const selectOrderPackageEntityFields = {
   select: {
-    packageId: true,
+    packageSnapshot: {
+      select: {
+        id: true,
+        originalPackageId: true,
+      },
+    },
     amountOrdered: true,
   },
 } as const;
+
+type OrderPackageRawEntity = Omit<OrderPackageModel, 'orderId' | 'packageSnapshotId'> & {
+  packageSnapshot: {
+    id: string,
+    originalPackageId: string | null,
+  }
+};
+
+function rawEntityToEntity(rawOrderPackage: OrderPackageRawEntity): OrderPackageEntity {
+  const { packageSnapshot, ...restOfOrderPackageFields } = rawOrderPackage;
+  
+  return {
+    ...restOfOrderPackageFields,
+    packageId: packageSnapshot.originalPackageId,
+    packageSnapshotId: packageSnapshot.id,
+  };
+}
 
 @Injectable()
 export class OrderPackagesService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    @Inject(forwardRef(() => OrdersService))
     private ordersService: OrdersService,
     private packageSnapshotsService: PackageSnapshotsService,
   ) {}
 
   @Transactional()
   async create(orderId: string, createOrderPackageDto: CreateOrderPackageDto): Promise<OrderPackageEntity> {
-    const createdOrderPackage = await this.currentTransaction.orderPackage.create({
-      data: {
-        ...createOrderPackageDto,
-        orderId,
-        packageId: await this.packageSnapshotsService.pickLatestSnapshotOf(createOrderPackageDto.packageId),
-      },
-      ...selectOrderPackageEntityFields,
-    });
+    const [createdOrderPackage] = await this.createMany(orderId, [createOrderPackageDto]);
+    return createdOrderPackage;
+  }
+
+  @Transactional()
+  async createMany(orderId: string, createOrderPackageDtos: CreateOrderPackageDto[]): Promise<OrderPackageEntity[]> {
+    const createdOrderPackages = await Promise.all(
+      createOrderPackageDtos.map(async (createOrderPackageDto) => {
+        const packageSnapshotId = createOrderPackageDto.packageSnapshotId
+          ?? await this.packageSnapshotsService.pickLatestSnapshotOf(createOrderPackageDto.packageId);
+        
+        const createdOrderPackage = await this.currentTransaction.orderPackage.create({
+          data: {
+            amountOrdered: createOrderPackageDto.amountOrdered,
+            orderId,
+            packageSnapshotId,
+          },
+          ...selectOrderPackageEntityFields,
+        });
+
+        return rawEntityToEntity(createdOrderPackage);
+      })
+    );
 
     await this.ordersService.updateOrderPrice(orderId);
 
-    return createdOrderPackage;
+    return createdOrderPackages;
   }
 
   @Transactional()
@@ -54,7 +93,7 @@ export class OrderPackagesService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const items = await this.currentTransaction.orderPackage.findMany({
+    const rawOrderPackages = await this.currentTransaction.orderPackage.findMany({
       where: {
         orderId,
       },
@@ -62,6 +101,7 @@ export class OrderPackagesService {
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
+    const items = rawOrderPackages.map(rawEntityToEntity);
 
     const itemCount = await this.currentTransaction.orderPackage.count({
       where: {
@@ -81,16 +121,28 @@ export class OrderPackagesService {
   }
 
   @Transactional()
-  async findOne(orderId: string, packageId: string): Promise<OrderPackageEntity | null> {
-    return await this.currentTransaction.orderPackage.findFirst({
+  async findAll(orderId: string): Promise<OrderPackageEntity[]> {
+    const rawOrderPackages = await this.currentTransaction.orderPackage.findMany({
       where: {
         orderId,
-        package: {
+      },
+      ...selectOrderPackageEntityFields,
+    });
+    return rawOrderPackages.map(rawEntityToEntity);
+  }
+
+  @Transactional()
+  async findOne(orderId: string, packageId: string): Promise<OrderPackageEntity | null> {
+    const rawOrderPackage = await this.currentTransaction.orderPackage.findFirst({
+      where: {
+        orderId,
+        packageSnapshot: {
           originalPackageId: packageId,
         },
       },
       ...selectOrderPackageEntityFields,
     });
+    return rawOrderPackage ? rawEntityToEntity(rawOrderPackage) : null;
   }
 
   @Transactional()
@@ -99,34 +151,29 @@ export class OrderPackagesService {
     packageId: string,
     updateOrderPackageDto: UpdateOrderPackageDto,
   ): Promise<OrderPackageEntity> {
-    let updatedPackageId!: string;
+    let newPackageId = packageId;
+    let newPackageSnapshotId = updateOrderPackageDto.packageSnapshotId;
     if (updateOrderPackageDto.packageId) {
-      updatedPackageId = await this.packageSnapshotsService.pickLatestSnapshotOf(updateOrderPackageDto.packageId);
-    } else {
-      updatedPackageId = packageId;
+      newPackageId = updateOrderPackageDto.packageId;
+      newPackageSnapshotId ??= await this.packageSnapshotsService.pickLatestSnapshotOf(updateOrderPackageDto.packageId);
     }
 
     await this.currentTransaction.orderPackage.updateMany({
       where: {
         orderId,
-        package: {
+        packageSnapshot: {
           originalPackageId: packageId,
         },
       },
       data: {
-        ...updateOrderPackageDto,
-        packageId: updatedPackageId,
+        packageSnapshotId: newPackageSnapshotId,
+        amountOrdered: updateOrderPackageDto.amountOrdered,
       },
     });
 
     await this.ordersService.updateOrderPrice(orderId);
 
-    const updatedOrderPackage = await this.findOne(orderId, updatedPackageId);
-    if (!updatedOrderPackage) {
-      throw new Error(
-        `Order package not found: There is no Order with ID ${orderId} that has a Package with ID ${updatedPackageId}`
-      );
-    }
+    const updatedOrderPackage = (await this.findOne(orderId, newPackageId)) as OrderPackageEntity;
     return updatedOrderPackage;
   }
 
@@ -142,7 +189,7 @@ export class OrderPackagesService {
     await this.currentTransaction.orderPackage.deleteMany({
       where: {
         orderId,
-        package: {
+        packageSnapshot: {
           originalPackageId: packageId,
         },
       },
