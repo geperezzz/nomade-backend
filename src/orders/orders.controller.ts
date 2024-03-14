@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Query,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -18,6 +19,7 @@ import { UpdateOrderDto } from './dtos/update-order.dto';
 import { OrderDto } from './dtos/order.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { ReplaceOrderDto } from './dtos/replace-order.dto';
 
 @Controller('orders')
 @ApiTags('Orders')
@@ -67,6 +69,18 @@ export class OrdersController {
       updateOrderDto,
     );
     return OrderDto.fromEntity(updatedOrder);
+  }
+
+  @Put(':id')
+  async replace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() replaceOrderDto: ReplaceOrderDto,
+  ): Promise<OrderDto> {
+    const newOrder = await this.ordersService.replace(
+      id,
+      replaceOrderDto,
+    );
+    return OrderDto.fromEntity(newOrder);
   }
 
   @Delete(':id')

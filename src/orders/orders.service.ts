@@ -16,6 +16,7 @@ import { OrderEntity } from './entities/order.entity';
 import { OrderPackagesService } from './packages/order-packages.service';
 import { OrderServicesService } from './services/order-services.service';
 import { OrderPaymentsService } from './payments/order-payments.service';
+import { ReplaceOrderDto } from './dtos/replace-order.dto';
 
 type OrderRawEntity = OrderModel;
 
@@ -45,19 +46,10 @@ export class OrdersService {
       },
     });
     
-    await Promise.all(
-      createOrderDto.orderedPackages.map(
-        createOrderPackageDto => this.orderPackagesService.create(createdId, createOrderPackageDto)
-      )
-    );
+    await this.orderPackagesService.createMany(createdId, createOrderDto.orderedPackages);
+    await this.orderServicesService.createMany(createdId, createOrderDto.orderedServices);
 
-    await Promise.all(
-      createOrderDto.orderedServices.map(
-        createOrderServiceDto => this.orderServicesService.create(createdId, createOrderServiceDto)
-      )
-    );
-
-    return await this.updateOrderPrice(createdId);
+    return (await this.findOne(createdId))!;
   }
 
   @Transactional()
@@ -162,36 +154,45 @@ export class OrdersService {
     id: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<OrderEntity> {
-    if (updateOrderDto.orderedPackages) {
-      await this.currentTransaction.orderPackage.deleteMany({
-        where: {
-          orderId: id,
-        },
-      });
-      await this.orderPackagesService.createMany(id, updateOrderDto.orderedPackages);
-    }
-
-    if (updateOrderDto.orderedServices) {
-      await this.currentTransaction.orderService.deleteMany({
-        where: {
-          orderId: id,
-        },
-      });
-      await this.orderServicesService.createMany(id, updateOrderDto.orderedServices);
-    }
-    
     const updatedOrder = await this.currentTransaction.order.update({
       where: {
         id,
       },
       data: {
         ...updateOrderDto,
-        orderedPackages: undefined,
-        orderedServices: undefined,
       },
     });
-
+    
     return await this.rawEntityToEntity(updatedOrder);
+  }
+
+  @Transactional()
+  async replace(
+    id: string,
+    replaceOrderDto: ReplaceOrderDto,
+  ): Promise<OrderEntity> {
+    const { id: newId } = await this.currentTransaction.order.update({
+      where: {
+        id,
+      },
+      data: {
+        ...replaceOrderDto,
+        orderedPackages: {
+          deleteMany: {},
+        },
+        orderedServices: {
+          deleteMany: {},
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    
+    await this.orderPackagesService.createMany(newId, replaceOrderDto.orderedPackages);
+    await this.orderServicesService.createMany(newId, replaceOrderDto.orderedServices);
+
+    return (await this.findOne(newId))!;
   }
 
   @Transactional()
