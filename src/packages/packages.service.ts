@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 
 import { CreatePackageDto } from './dtos/create-package.dto';
@@ -13,12 +13,13 @@ import {
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { ReplacePackageDto } from './dtos/replace-package.dto';
+import { PackageServicesService } from './services/package-services.service';
 
 const selectPackageEntityFields = {
   include: {
     containedServices: {
       select: {
-        serviceId: true,
+        service: true,
         amountContained: true,
       },
     },
@@ -30,6 +31,8 @@ export class PackagesService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    @Inject(forwardRef(() => PackageServicesService))
+    private packageServicesService: PackageServicesService,
   ) {}
 
   @Transactional()
@@ -37,19 +40,17 @@ export class PackagesService {
     const { id } = await this.currentTransaction.package.create({
       data: {
         ...createPackageDto,
-        containedServices: {
-          create: createPackageDto.containedServices,
-        },
+        containedServices: undefined,
       },
       select: {
         id: true,
       },
     });
 
-    if (!createPackageDto.containedServices) {
-      return (await this.findOne(id))!;
+    if (createPackageDto.containedServices) {
+      await this.packageServicesService.createMany(id, createPackageDto.containedServices);
     }
-    return await this.updatePriceOfPackage(id);
+    return (await this.findOne(id))!;
   }
 
   @Transactional()
@@ -103,10 +104,10 @@ export class PackagesService {
       },
     });
 
-    if (!updatePackageDto.appliedDiscountPercentage) {
-      return (await this.findOne(newId))!;
+    if (updatePackageDto.appliedDiscountPercentage) {
+      return await this.updatePriceOfPackage(newId);
     }
-    return await this.updatePriceOfPackage(newId);
+    return (await this.findOne(newId))!;
   }
 
   @Transactional()
@@ -129,18 +130,10 @@ export class PackagesService {
       },
     });
 
-    await this.currentTransaction.package.update({
-      where: {
-        id: newId,
-      },
-      data: {
-        containedServices: {
-          create: replacePackageDto.containedServices,
-        },
-      },
-    });
-
-    return await this.updatePriceOfPackage(newId);
+    if (replacePackageDto.containedServices) {
+      await this.packageServicesService.createMany(newId, replacePackageDto.containedServices);
+    }
+    return (await this.findOne(newId))!;
   }
 
   @Transactional()

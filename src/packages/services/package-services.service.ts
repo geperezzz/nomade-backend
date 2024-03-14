@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 
 import { CreatePackageServiceDto } from './dtos/create-package-service.dto';
 import { UpdatePackageServiceDto } from './dtos/update-package-service.dto';
@@ -15,7 +15,7 @@ import { PackagesService } from '../packages.service';
 
 const selectPackageServiceEntityFields = {
   select: {
-    serviceId: true,
+    service: true,
     amountContained: true,
   },
 } as const;
@@ -25,6 +25,7 @@ export class PackageServicesService {
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
+    @Inject(forwardRef(() => PackagesService))
     private packagesService: PackagesService,
   ) {}
 
@@ -33,16 +34,30 @@ export class PackageServicesService {
     packageId: string,
     createPackageServiceDto: CreatePackageServiceDto,
   ): Promise<PackageServiceEntity> {
-    const createdPackageService =
-      await this.currentTransaction.packageService.create({
-        data: {
-          ...createPackageServiceDto,
-          packageId,
-        },
-        ...selectPackageServiceEntityFields,
-      });
-    await this.packagesService.updatePriceOfPackage(packageId);
+    const [createdPackageService] = await this.createMany(packageId, [createPackageServiceDto]);
     return createdPackageService;
+  }
+
+  @Transactional()
+  async createMany(
+    packageId: string,
+    createPackageServiceDtos: CreatePackageServiceDto[],
+  ): Promise<PackageServiceEntity[]> {
+    const createdPackageServices = await Promise.all(
+      createPackageServiceDtos.map(
+        async (createPackageServiceDto) =>
+          await this.currentTransaction.packageService.create({
+            data: {
+              packageId,
+              serviceId: createPackageServiceDto.service.id,
+              amountContained: createPackageServiceDto.amountContained,
+            },
+            ...selectPackageServiceEntityFields,
+          })
+      )
+    );
+    await this.packagesService.updatePriceOfPackage(packageId);
+    return createdPackageServices;
   }
 
   @Transactional()
@@ -90,8 +105,8 @@ export class PackageServicesService {
           packageId,
           serviceId,
         },
-        ...selectPackageServiceEntityFields,
       },
+      ...selectPackageServiceEntityFields,
     });
   }
 
@@ -109,7 +124,10 @@ export class PackageServicesService {
             serviceId,
           },
         },
-        data: updatePackageServiceDto,
+        data: {
+          amountContained: updatePackageServiceDto.amountContained,
+          serviceId: updatePackageServiceDto.service?.id,
+        },
         ...selectPackageServiceEntityFields,
       });
     await this.packagesService.updatePriceOfPackage(packageId);

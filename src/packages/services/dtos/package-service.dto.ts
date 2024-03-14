@@ -5,7 +5,7 @@ import { serviceSchema } from 'src/services/dtos/service.dto';
 import { PackageServiceEntity } from '../entities/package-service.entity';
 
 export const packageServiceSchema = z.object({
-  serviceId: serviceSchema.shape.id,
+  service: serviceSchema,
   amountContained: z.number().int().positive(),
 });
 

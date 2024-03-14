@@ -8,5 +8,6 @@ import { PackagesModule } from '../packages.module';
   imports: [forwardRef(() => PackagesModule)],
   controllers: [PackageServicesController],
   providers: [PackageServicesService],
+  exports: [PackageServicesService],
 })
 export class PackageServicesModule {}

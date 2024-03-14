@@ -1,3 +1,5 @@
-import { PackageService as PackageServiceModel } from '@prisma/client';
+import { PackageService as PackageServiceModel, Service as ServiceModel } from '@prisma/client';
 
-export type PackageServiceEntity = Omit<PackageServiceModel, 'packageId'>;
+export type PackageServiceEntity = Omit<PackageServiceModel, 'packageId' | 'serviceId'> & {
+  service: ServiceModel;
+};

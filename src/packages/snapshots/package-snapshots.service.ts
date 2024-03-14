@@ -57,8 +57,8 @@ export class PackageSnapshotsService {
     
     const containedServicesAsSnapshots = await Promise.all(
       originalPackage.containedServices.map(
-        async ({ serviceId, amountContained }) => ({
-          serviceId: await this.serviceSnapshotsService.createSnapshotOf(serviceId),
+        async ({ service, amountContained }) => ({
+          serviceId: await this.serviceSnapshotsService.createSnapshotOf(service.id),
           amountContained,
         })
       )
