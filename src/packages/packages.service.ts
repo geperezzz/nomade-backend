@@ -12,6 +12,7 @@ import {
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { ReplacePackageDto } from './dtos/replace-package.dto';
 
 const selectPackageEntityFields = {
   include: {
@@ -105,6 +106,40 @@ export class PackagesService {
     if (!updatePackageDto.appliedDiscountPercentage) {
       return (await this.findOne(newId))!;
     }
+    return await this.updatePriceOfPackage(newId);
+  }
+
+  @Transactional()
+  async replace(
+    id: string,
+    replacePackageDto: ReplacePackageDto,
+  ): Promise<PackageEntity> {
+    const { id: newId } = await this.currentTransaction.package.update({
+      where: {
+        id,
+      },
+      data: {
+        ...replacePackageDto,
+        containedServices: {
+          deleteMany: {},
+        }
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await this.currentTransaction.package.update({
+      where: {
+        id: newId,
+      },
+      data: {
+        containedServices: {
+          create: replacePackageDto.containedServices,
+        },
+      },
+    });
+
     return await this.updatePriceOfPackage(newId);
   }
 

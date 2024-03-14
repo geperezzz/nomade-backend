@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Query,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -18,6 +19,7 @@ import { UpdatePackageDto } from './dtos/update-package.dto';
 import { PackageDto } from './dtos/package.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { ReplacePackageDto } from './dtos/replace-package.dto';
 
 @Controller('packages')
 @ApiTags('Packages')
@@ -66,6 +68,18 @@ export class PackagesController {
       updatePackageDto,
     );
     return PackageDto.fromEntity(updatedPackage);
+  }
+
+  @Put(':id')
+  async replace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() replacePackageDto: ReplacePackageDto,
+  ): Promise<PackageDto> {
+    const newPackage = await this.packagesService.replace(
+      id,
+      replacePackageDto,
+    );
+    return PackageDto.fromEntity(newPackage);
   }
 
   @Delete(':id')
