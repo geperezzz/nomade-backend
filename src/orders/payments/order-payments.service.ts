@@ -33,13 +33,25 @@ export class OrderPaymentsService {
 
   @Transactional()
   async create(orderId: string, createOrderPaymentDto: CreateOrderPaymentDto): Promise<OrderPaymentEntity> {
+    const order = await this.currentTransaction.order.findUniqueOrThrow({
+      where: {
+        id: orderId,
+      },
+      select: {
+        placementTimestamp: true,
+      },
+    });
+    if (createOrderPaymentDto.paymentTimestamp < order.placementTimestamp) {
+      throw new Error('Invalid payment: The payment timestamp is before the order placement timestamp');
+    }
+    
     const appliedCommissionPercentage = await this.getCommissionPercentageOfPaymentMethod(createOrderPaymentDto.paymentMethodId);
     const amountWithCommissionPaid = this.calculateAmountWithCommissionPaid(
       createOrderPaymentDto.netAmountPaid,
       appliedCommissionPercentage,
     );
     
-    return await this.currentTransaction.payment.create({
+    const createdOrderPayment = await this.currentTransaction.payment.create({
       data: {
         ...createOrderPaymentDto,
         orderId,
@@ -48,6 +60,11 @@ export class OrderPaymentsService {
       },
       ...selectOrderPaymentEntityFields,
     });
+
+    if (await this.isOrderOverpaid(orderId)) {
+      throw new Error('Invalid payment: If the payment is created, the order would be overpaid');
+    }
+    return createdOrderPayment;
   }
 
   @Transactional()
@@ -119,6 +136,20 @@ export class OrderPaymentsService {
         `Order payment not found: There is no Order with ID ${orderId} that has a payment with ID ${paymentNumber}`,
       );
     }
+
+    if (updateOrderPaymentDto.paymentTimestamp) {
+      const order = await this.currentTransaction.order.findUniqueOrThrow({
+        where: {
+          id: orderId,
+        },
+        select: {
+          placementTimestamp: true,
+        },
+      });
+      if (updateOrderPaymentDto.paymentTimestamp < order.placementTimestamp) {
+        throw new Error('Invalid payment: The payment timestamp is before the order placement timestamp');
+      }
+    }
     
     let netAmountPaid!: Decimal;
     if (updateOrderPaymentDto.netAmountPaid) {
@@ -139,7 +170,7 @@ export class OrderPaymentsService {
       appliedCommissionPercentage,
     );
 
-    return await this.currentTransaction.payment.update({
+    const updatedOrderPayment = await this.currentTransaction.payment.update({
       where: {
         orderId_paymentNumber: {
           orderId,
@@ -153,6 +184,11 @@ export class OrderPaymentsService {
       },
       ...selectOrderPaymentEntityFields,
     });
+
+    if (await this.isOrderOverpaid(orderId)) {
+      throw new Error('Invalid payment: If the payment is updated, the order would be overpaid');
+    }
+    return updatedOrderPayment;
   }
 
   @Transactional()
@@ -190,5 +226,25 @@ export class OrderPaymentsService {
       },
       ...selectOrderPaymentEntityFields,
     });
+  }
+
+  @Transactional()
+  private async isOrderOverpaid(orderId: string): Promise<boolean> {
+    const order = await this.currentTransaction.order.findUniqueOrThrow({
+      where: {
+        id: orderId,
+      },
+    });
+    const netAmountPaid = await this.calculateNetAmountPaidForOrder(orderId);
+    return netAmountPaid.greaterThan(order.price);
+  }
+
+  @Transactional()
+  private async calculateNetAmountPaidForOrder(orderId: string): Promise<Decimal> {
+    const orderPayments = await this.findAll(orderId);
+    return orderPayments.reduce(
+      (netAmountPaid, orderPayment) => netAmountPaid.add(orderPayment.netAmountPaid),
+      new Decimal(0),
+    );
   }
 }

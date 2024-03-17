@@ -17,6 +17,7 @@ import { OrdersModule } from 'src/orders/orders.module';
 import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
 import { StaffModule } from 'src/staff/staff.module';
 import { AvailableOccupationsModule } from 'src/staff/available-occupations/available-occupations.module';
+import { ProfitsModule } from 'src/profits/profits.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AvailableOccupationsModule } from 'src/staff/available-occupations/avai
     PaymentMethodsModule,
     PackagesModule,
     ServicesModule,
+    ProfitsModule,
   ],
   controllers: [],
   providers: [

@@ -150,6 +150,27 @@ export class OrdersService {
   }
 
   @Transactional()
+  async findPaidOrders() {
+    const allOrders = await this.currentTransaction.order.findMany();
+    const paidOrders = await Promise.all(
+      allOrders.filter(async order => {
+        const aggregations = await this.currentTransaction.payment.aggregate({
+          where: {
+            orderId: order.id,
+          },
+          _sum: {
+            netAmountPaid: true,
+          },
+        });
+        return order.price === aggregations._sum.netAmountPaid;
+      })
+    );
+    return await Promise.all(
+      paidOrders.map(async order => await this.rawEntityToEntity(order))
+    );
+  }
+
+  @Transactional()
   async update(
     id: string,
     updateOrderDto: UpdateOrderDto,
