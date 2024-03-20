@@ -30,6 +30,7 @@ function addSwaggerSupport(
     .setTitle('Nomade')
     .setDescription('The Nomade API documentation')
     .setVersion(appConfig.get('APP_VERSION', { infer: true }))
+    .addBearerAuth()
     .build();
   const openApiDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, openApiDocument);
