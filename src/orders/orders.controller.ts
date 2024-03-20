@@ -20,9 +20,16 @@ import { OrderDto } from './dtos/order.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { ReplaceOrderDto } from './dtos/replace-order.dto';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('orders')
 @ApiTags('Orders')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+  StaffOccupationName.SALESPERSON,
+)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 

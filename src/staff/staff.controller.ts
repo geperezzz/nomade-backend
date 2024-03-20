@@ -18,9 +18,14 @@ import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { EmployeeDto } from './dtos/employee.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from './entities/employee.entity';
 
 @Controller('staff')
 @ApiTags('Staff')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+)
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 

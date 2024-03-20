@@ -18,9 +18,15 @@ import { UpdatePaymentMethodDto } from './dtos/update-payment-method.dto';
 import { PaymentMethodDto } from './dtos/payment-method.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('payment-methods')
 @ApiTags('Payment methods')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+)
 export class PaymentMethodsController {
   constructor(private readonly paymentMethodsService: PaymentMethodsService) {}
 
@@ -34,6 +40,9 @@ export class PaymentMethodsController {
   }
 
   @Get()
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<PaymentMethodDto>> {
@@ -45,6 +54,9 @@ export class PaymentMethodsController {
   }
 
   @Get(':id')
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PaymentMethodDto> {
     const foundPaymentMethod = await this.paymentMethodsService.findOne(id);
 

@@ -18,9 +18,15 @@ import { UpdateHotelPerNightDto } from './dtos/update-hotel-per-night.dto';
 import { HotelPerNightDto } from './dtos/hotel-per-night.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/hotels-per-night')
 @ApiTags('Hotels per night')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+)
 export class HotelsPerNightController {
   constructor(private readonly hotelsPerNightService: HotelsPerNightService) {}
 
@@ -35,6 +41,9 @@ export class HotelsPerNightController {
   }
 
   @Get()
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<HotelPerNightDto>> {
@@ -48,6 +57,9 @@ export class HotelsPerNightController {
   }
 
   @Get(':id')
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<HotelPerNightDto> {

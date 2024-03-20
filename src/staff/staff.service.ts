@@ -6,6 +6,7 @@ import {
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Employee as EmployeeModel } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
@@ -27,7 +28,10 @@ export class StaffService {
   @Transactional()
   async create(createEmployeeDto: CreateEmployeeDto): Promise<EmployeeEntity> {
     const createdEmployee = await this.currentTransaction.employee.create({
-      data: createEmployeeDto,
+      data: {
+        ...createEmployeeDto,
+        password: await this.hashPassword(createEmployeeDto.password),
+      },
     });
 
     return await this.rawEntityToEntity(createdEmployee);
@@ -77,6 +81,30 @@ export class StaffService {
 
     return rawEmployee ? await this.rawEntityToEntity(rawEmployee) : null;
   }
+  
+  @Transactional()
+  async findOneByEmail(email: string): Promise<EmployeeEntity | null> {
+    const rawEmployee = await this.currentTransaction.employee.findFirst({
+      where: {
+        email,
+        deletedAt: null,
+      },
+    });
+
+    return rawEmployee ? await this.rawEntityToEntity(rawEmployee) : null;
+  }
+
+  @Transactional()
+  async findOneByDni(dni: string): Promise<EmployeeEntity | null> {
+    const rawEmployee = await this.currentTransaction.employee.findFirst({
+      where: {
+        dni,
+        deletedAt: null,
+      },
+    });
+
+    return rawEmployee ? await this.rawEntityToEntity(rawEmployee) : null;
+  }
 
   @Transactional()
   async update(
@@ -88,7 +116,12 @@ export class StaffService {
         id,
         deletedAt: null,
       },
-      data: updateEmployeeDto,
+      data: {
+        ...updateEmployeeDto,
+        password: updateEmployeeDto.password
+          ? await this.hashPassword(updateEmployeeDto.password)
+          : undefined,
+      },
     });
 
     return await this.rawEntityToEntity(updatedEmployee);
@@ -131,5 +164,9 @@ export class StaffService {
       ...rawEmployee,
       occupations,
     };
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, 10);
   }
 }

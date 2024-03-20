@@ -18,9 +18,15 @@ import { UpdateCarRentalDto } from './dtos/update-car-rental.dto';
 import { CarRentalDto } from './dtos/car-rental.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/car-rentals')
 @ApiTags('Car rentals')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+)
 export class CarRentalsController {
   constructor(private readonly carRentalsService: CarRentalsService) {}
 
@@ -35,6 +41,9 @@ export class CarRentalsController {
   }
 
   @Get()
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<CarRentalDto>> {
@@ -48,6 +57,9 @@ export class CarRentalsController {
   }
 
   @Get(':id')
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CarRentalDto> {

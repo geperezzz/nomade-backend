@@ -19,9 +19,16 @@ import { UpdateOrderPaymentDto } from './dtos/update-order-payment.dto';
 import { OrderPaymentDto } from './dtos/order-payment.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('orders/:orderId/payments')
 @ApiTags('Orders\' payments')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+  StaffOccupationName.SALESPERSON,
+)
 export class OrderPaymentsController {
   constructor(private readonly orderPaymentsService: OrderPaymentsService) {}
 

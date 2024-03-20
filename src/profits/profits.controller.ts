@@ -4,9 +4,16 @@ import { ApiTags } from '@nestjs/swagger';
 import { ProfitsPeriodQueryDto } from './dtos/profits-period-query.dto';
 import { ProfitsService } from './profits.service';
 import { ProfitsDto } from './dtos/profits.dto';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('profits')
 @ApiTags('Profits')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+  StaffOccupationName.SALESPERSON,
+)
 export class ProfitsController {
   constructor(
     private profitsService: ProfitsService,

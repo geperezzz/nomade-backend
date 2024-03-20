@@ -18,9 +18,15 @@ import { UpdateTrainTicketDto } from './dtos/update-train-ticket.dto';
 import { TrainTicketDto } from './dtos/train-ticket.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/train-tickets')
 @ApiTags('Train tickets')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+)
 export class TrainTicketsController {
   constructor(private readonly trainTicketsService: TrainTicketsService) {}
 
@@ -35,6 +41,9 @@ export class TrainTicketsController {
   }
 
   @Get()
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<TrainTicketDto>> {
@@ -48,6 +57,9 @@ export class TrainTicketsController {
   }
 
   @Get(':id')
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TrainTicketDto> {

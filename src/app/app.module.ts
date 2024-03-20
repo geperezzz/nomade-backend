@@ -18,6 +18,7 @@ import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module
 import { StaffModule } from 'src/staff/staff.module';
 import { AvailableOccupationsModule } from 'src/staff/available-occupations/available-occupations.module';
 import { ProfitsModule } from 'src/profits/profits.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ProfitsModule } from 'src/profits/profits.module';
       global: true,
       middleware: { mount: true },
     }),
+    AuthModule,
     AvailableOccupationsModule,
     StaffModule,
     CustomersModule,
@@ -45,6 +47,7 @@ import { ProfitsModule } from 'src/profits/profits.module';
     PackagesModule,
     ServicesModule,
     ProfitsModule,
+    PrismaModule,
   ],
   controllers: [],
   providers: [

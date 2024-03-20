@@ -18,9 +18,15 @@ import { UpdateEventDto } from './dtos/update-event.dto';
 import { EventDto } from './dtos/event.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 
 @Controller('services/events')
 @ApiTags('Events')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+)
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
@@ -35,6 +41,9 @@ export class EventsController {
   }
 
   @Get()
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<EventDto>> {
@@ -48,6 +57,9 @@ export class EventsController {
   }
 
   @Get(':id')
+  @MustBeLoggedInAs(
+    StaffOccupationName.SALESPERSON,
+  )
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<EventDto> {

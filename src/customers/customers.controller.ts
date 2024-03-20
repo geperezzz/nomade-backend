@@ -18,9 +18,16 @@ import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { CustomerDto } from './dtos/customer.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
+import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('customers')
 @ApiTags('Customers')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+  StaffOccupationName.ADMIN,
+  StaffOccupationName.SALESPERSON,
+)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 

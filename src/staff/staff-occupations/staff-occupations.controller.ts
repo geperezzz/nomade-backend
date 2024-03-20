@@ -19,10 +19,14 @@ import { Page } from 'src/common/pagination/page.type';
 import { CreateStaffOccupationDto, createStaffOccupationSchema } from './dtos/create-staff-occupation.dto';
 import { StaffOccupationName } from '../entities/employee.entity';
 import { UpdateStaffOccupationDto, updateStaffOccupationSchema } from './dtos/update-staff-occupation.dto';
-import { zodPipeFor } from 'src/common/zod-pipe-for.function';
+import { zodPipeFor } from 'src/common/zod-pipe-for';
+import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 
 @Controller('staff/:employeeId/occupations')
 @ApiTags('Staff\'s occupations')
+@MustBeLoggedInAs(
+  StaffOccupationName.SUPER_ADMIN,
+)
 export class StaffOccupationsController {
   constructor(private readonly staffOccupationsService: StaffOccupationsService) {}
 
