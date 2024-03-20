@@ -5,7 +5,8 @@ import {
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { OrderPackage as OrderPackageModel } from '@prisma/client';
+import { OrderPackage as OrderPackageModel, PackageSnapshot as PackageSnapshotModel, PackageSnapshotService as PackageSnapshotServiceModel, ServiceSnapshot as ServiceSnapshotModel } from '@prisma/client';
+import * as _ from 'lodash';
 
 import { CreateOrderPackageDto } from './dtos/create-order-package.dto';
 import { UpdateOrderPackageDto } from './dtos/update-order-package.dto';
@@ -16,31 +17,52 @@ import { OrdersService } from '../orders.service';
 import { PackageSnapshotsService } from 'src/packages/snapshots/package-snapshots.service';
 
 const selectOrderPackageEntityFields = {
-  select: {
+  include: {
     packageSnapshot: {
-      select: {
-        id: true,
-        originalPackageId: true,
-      },
+      include: {
+        containedServices: {
+          include: {
+            service: true,
+          }
+        },
+      }
     },
-    amountOrdered: true,
   },
 } as const;
 
-type OrderPackageRawEntity = Omit<OrderPackageModel, 'orderId' | 'packageSnapshotId'> & {
-  packageSnapshot: {
-    id: string,
-    originalPackageId: string | null,
-  }
+type OrderPackageRawEntity = OrderPackageModel & {
+  packageSnapshot: PackageSnapshotModel & {
+    containedServices: (PackageSnapshotServiceModel & {
+      service: ServiceSnapshotModel;
+    })[];
+  };
 };
 
 function rawEntityToEntity(rawOrderPackage: OrderPackageRawEntity): OrderPackageEntity {
-  const { packageSnapshot, ...restOfOrderPackageFields } = rawOrderPackage;
+  let orderedPackage = {
+    ..._.omit(
+      rawOrderPackage,
+      'orderId',
+      'packageSnapshotId',
+      'packageSnapshot.originalPackageId'
+    ),
+    packageId: rawOrderPackage.packageSnapshot.originalPackageId,
+  };
+  
+  const containedServices = orderedPackage.packageSnapshot.containedServices.map(
+    containedService => ({
+      serviceId: containedService.service.originalServiceId,
+      serviceSnapshot: _.omit(containedService.service, 'originalServiceId'),
+      amountContained: containedService.amountContained,
+    })
+  );
   
   return {
-    ...restOfOrderPackageFields,
-    packageId: packageSnapshot.originalPackageId,
-    packageSnapshotId: packageSnapshot.id,
+    ...orderedPackage,
+    packageSnapshot: {
+      ...orderedPackage.packageSnapshot,
+      containedServices,
+    }
   };
 }
 
@@ -64,7 +86,7 @@ export class OrderPackagesService {
   async createMany(orderId: string, createOrderPackageDtos: CreateOrderPackageDto[]): Promise<OrderPackageEntity[]> {
     const createdOrderPackages = await Promise.all(
       createOrderPackageDtos.map(async (createOrderPackageDto) => {
-        const packageSnapshotId = createOrderPackageDto.packageSnapshotId
+        const packageSnapshotId = createOrderPackageDto.packageSnapshot?.id
           ?? await this.packageSnapshotsService.pickLatestSnapshotOf(createOrderPackageDto.packageId);
         
         const createdOrderPackage = await this.currentTransaction.orderPackage.create({
@@ -75,7 +97,7 @@ export class OrderPackagesService {
           },
           ...selectOrderPackageEntityFields,
         });
-
+        
         return rawEntityToEntity(createdOrderPackage);
       })
     );
@@ -152,7 +174,7 @@ export class OrderPackagesService {
     updateOrderPackageDto: UpdateOrderPackageDto,
   ): Promise<OrderPackageEntity> {
     let newPackageId = packageId;
-    let newPackageSnapshotId = updateOrderPackageDto.packageSnapshotId;
+    let newPackageSnapshotId = updateOrderPackageDto.packageSnapshot?.id;
     if (updateOrderPackageDto.packageId) {
       newPackageId = updateOrderPackageDto.packageId;
       newPackageSnapshotId ??= await this.packageSnapshotsService.pickLatestSnapshotOf(updateOrderPackageDto.packageId);

@@ -5,6 +5,7 @@ import {
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import * as _ from 'lodash';
 
 import { PackagesService } from '../packages.service';
 import { ServiceSnapshotsService } from 'src/services/snapshots/service-snapshots.service';
@@ -66,8 +67,7 @@ export class PackageSnapshotsService {
 
     const { id: snapshotId } = await this.currentTransaction.packageSnapshot.create({
       data: {
-        ...originalPackage,
-        id: undefined, // Remove the original ID and generate a new one
+        ..._.omit(originalPackage, 'id', 'lastUpdateTimestamp'),
         originalPackageId: packageId,
         containedServices: {
           create: containedServicesAsSnapshots,

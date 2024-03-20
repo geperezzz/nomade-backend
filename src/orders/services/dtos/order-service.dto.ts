@@ -6,7 +6,9 @@ import { serviceSchema } from 'src/services/dtos/service.dto';
 
 export const orderServiceSchema = z.object({
   serviceId: serviceSchema.shape.id.optional(),
-  serviceSnapshotId: z.string().uuid(),
+  serviceSnapshot: serviceSchema.extend({
+    snapshotTimestamp: z.coerce.date(),
+  }),
   amountOrdered: z.coerce.number().positive(),
 });
 

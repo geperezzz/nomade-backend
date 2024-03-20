@@ -5,7 +5,7 @@ import { serviceSchema } from 'src/services/dtos/service.dto';
 export const createOrderServiceSchema = orderServiceSchema
   .extend({
     serviceId: serviceSchema.shape.id,
-    serviceSnapshotId: orderServiceSchema.shape.serviceSnapshotId.optional(),
+    serviceSnapshot: orderServiceSchema.shape.serviceSnapshot.pick({ id: true }).optional(),
   });
 
 export class CreateOrderServiceDto extends createZodDto(createOrderServiceSchema) {}

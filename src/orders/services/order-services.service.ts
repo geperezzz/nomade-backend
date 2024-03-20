@@ -5,7 +5,7 @@ import {
   Transactional,
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { OrderService as OrderServiceModel } from '@prisma/client';
+import { OrderService as OrderServiceModel, ServiceSnapshot as ServiceSnapshotModel } from '@prisma/client';
 
 import { CreateOrderServiceDto } from './dtos/create-order-service.dto';
 import { UpdateOrderServiceDto } from './dtos/update-order-service.dto';
@@ -17,30 +17,23 @@ import { ServiceSnapshotsService } from 'src/services/snapshots/service-snapshot
 
 const selectOrderServiceEntityFields = {
   select: {
-    serviceSnapshot: {
-      select: {
-        id: true,
-        originalServiceId: true,
-      }
-    },
+    serviceSnapshot: true,
     amountOrdered: true,
   },
 } as const;
 
 type OrderServiceRawEntity = Omit<OrderServiceModel, 'orderId' | 'serviceSnapshotId'> & {
-  serviceSnapshot: {
-    id: string,
-    originalServiceId: string | null,
-  }
+  serviceSnapshot: ServiceSnapshotModel, 
 };
 
 function rawEntityToEntity(rawOrderService: OrderServiceRawEntity): OrderServiceEntity {
   const { serviceSnapshot, ...restOfOrderServiceFields } = rawOrderService;
-  
+  const { originalServiceId, ...serviceSnapshotWithoutOriginalServiceId } = serviceSnapshot;
+
   return {
     ...restOfOrderServiceFields,
-    serviceId: serviceSnapshot.originalServiceId,
-    serviceSnapshotId: serviceSnapshot.id,
+    serviceId: originalServiceId,
+    serviceSnapshot: serviceSnapshotWithoutOriginalServiceId,
   };
 }
 
@@ -64,7 +57,7 @@ export class OrderServicesService {
   async createMany(orderId: string, createOrderServiceDtos: CreateOrderServiceDto[]): Promise<OrderServiceEntity[]> {
     const createdOrderServices = await Promise.all(
       createOrderServiceDtos.map(async (createOrderServiceDto) => {
-        const serviceSnapshotId = createOrderServiceDto.serviceSnapshotId
+        const serviceSnapshotId = createOrderServiceDto.serviceSnapshot?.id
           ?? await this.serviceSnapshotsService.pickLatestSnapshotOf(createOrderServiceDto.serviceId);
         
         const createdOrderService = await this.currentTransaction.orderService.create({
@@ -152,7 +145,7 @@ export class OrderServicesService {
     updateOrderServiceDto: UpdateOrderServiceDto,
   ): Promise<OrderServiceEntity> {
     let newServiceId = serviceId;
-    let newServiceSnapshotId = updateOrderServiceDto.serviceSnapshotId;
+    let newServiceSnapshotId = updateOrderServiceDto.serviceSnapshot?.id;
     if (updateOrderServiceDto.serviceId) {
       newServiceId = updateOrderServiceDto.serviceId;
       newServiceSnapshotId ??= await this.serviceSnapshotsService.pickLatestSnapshotOf(updateOrderServiceDto.serviceId);

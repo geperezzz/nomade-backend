@@ -1,5 +1,6 @@
-import { OrderService } from '@prisma/client';
+import { OrderService as OrderServiceModel, ServiceSnapshot as ServiceSnapshotModel } from '@prisma/client';
 
-export type OrderServiceEntity = Omit<OrderService, 'orderId'> & {
+export type OrderServiceEntity = Omit<OrderServiceModel, 'orderId' | 'serviceSnapshotId'> & {
   serviceId: string | null,
+  serviceSnapshot: Omit<ServiceSnapshotModel, 'originalServiceId'>,
 };
