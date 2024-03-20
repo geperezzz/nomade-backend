@@ -34,6 +34,11 @@ export class SeedingService {
 
   @Transactional()
   private async createSuperAdmin(): Promise<void> {
+    const isAlreadyCreated = await this.staffService.findOneByEmail(this.seedingConfig.SUPER_ADMIN_TO_CREATE.email);
+    if (isAlreadyCreated) {
+      return;
+    }
+    
     const createdSuperAdmin = await this.staffService.create(
       this.seedingConfig.SUPER_ADMIN_TO_CREATE,
     );
