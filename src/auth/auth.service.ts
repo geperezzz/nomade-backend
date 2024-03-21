@@ -26,7 +26,7 @@ export class AuthService {
     if (!employee) {
       throw new Error('Employee not found');
     }
-    if (!await bcrypt.compare(employee.password, loginDto.password)) {
+    if (!await bcrypt.compare(loginDto.password, employee.password)) {
       throw new Error('Invalid password');
     }
     

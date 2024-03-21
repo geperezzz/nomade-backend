@@ -5,6 +5,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { NoLoginRequired } from './no-login-required.decorator';
+import { TokenDto, tokenSchema } from './dtos/token.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -18,11 +19,8 @@ export class AuthController {
   @NoLoginRequired()
   async login(
     @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<string> {
+  ): Promise<TokenDto> {
     const token = await this.authenticationService.login(loginDto); 
-    response.set('Authorization', `Bearer ${token}`);
-    
-    return 'Successfully logged in';
+    return tokenSchema.parse({ token });
   }
 }
