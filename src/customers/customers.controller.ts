@@ -50,6 +50,32 @@ export class CustomersController {
 
     return { ...foundCustomersPage, items };
   }
+  
+  @Get('email/:email')
+  async findOneByEmail(@Param('email') email: string): Promise<CustomerDto> {
+    const foundCustomer = await this.customersService.findOneByEmail(email);
+
+    if (!foundCustomer) {
+      throw new NotFoundException(
+        'Customer not found',
+        `There is no Customer with email ${email}`,
+      );
+    }
+    return CustomerDto.fromEntity(foundCustomer);
+  }
+  
+  @Get('dni/:dni')
+  async findOneByDni(@Param('dni') dni: string): Promise<CustomerDto> {
+    const foundCustomer = await this.customersService.findOneByDni(dni);
+
+    if (!foundCustomer) {
+      throw new NotFoundException(
+        'Customer not found',
+        `There is no Customer with DNI ${dni}`,
+      );
+    }
+    return CustomerDto.fromEntity(foundCustomer);
+  }
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<CustomerDto> {

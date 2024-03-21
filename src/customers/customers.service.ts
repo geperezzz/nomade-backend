@@ -69,6 +69,26 @@ export class CustomersService {
   }
 
   @Transactional()
+  async findOneByEmail(email: string): Promise<CustomerEntity | null> {
+    return await this.currentTransaction.customer.findFirst({
+      where: {
+        email,
+        deletedAt: null,
+      },
+    });
+  }
+
+  @Transactional()
+  async findOneByDni(dni: string): Promise<CustomerEntity | null> {
+    return await this.currentTransaction.customer.findFirst({
+      where: {
+        dni,
+        deletedAt: null,
+      },
+    });
+  }
+
+  @Transactional()
   async update(
     id: string,
     updateCustomerDto: UpdateCustomerDto,
