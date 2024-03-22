@@ -3,7 +3,7 @@ import { z } from 'nestjs-zod/z';
 
 import { employeeSchema } from 'src/staff/dtos/employee.dto';
 
-export const loginSchema = z
+export const loginInputSchema = z
   .object({
     password: z.string(),
     employeeId: employeeSchema.shape.id.optional(),
@@ -18,4 +18,4 @@ export const loginSchema = z
     }
   );
 
-export class LoginDto extends createZodDto(loginSchema) {};
+export class LoginInputDto extends createZodDto(loginInputSchema) {};

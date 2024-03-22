@@ -3,9 +3,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { LoginDto } from './dtos/login.dto';
+import { LoginInputDto } from './dtos/login-input.dto';
 import { NoLoginRequired } from './no-login-required.decorator';
-import { TokenDto, tokenSchema } from './dtos/token.dto';
+import { LoginOutputDto, loginOutputSchema } from './dtos/login-output.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -18,9 +18,9 @@ export class AuthController {
   @HttpCode(200)
   @NoLoginRequired()
   async login(
-    @Body() loginDto: LoginDto,
-  ): Promise<TokenDto> {
-    const token = await this.authenticationService.login(loginDto); 
-    return tokenSchema.parse({ token });
+    @Body() loginInputDto: LoginInputDto,
+  ): Promise<LoginOutputDto> {
+    const loginOutput = await this.authenticationService.login(loginInputDto); 
+    return loginOutputSchema.parse(loginOutput);
   }
 }
