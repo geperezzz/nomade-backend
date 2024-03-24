@@ -154,6 +154,8 @@ export class CarRentalsService {
         },
         ...selectCarRentalFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedCarRental);
   }
 }

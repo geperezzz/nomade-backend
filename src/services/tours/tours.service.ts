@@ -154,6 +154,8 @@ export class ToursService {
         },
         ...selectTourFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedTour);
   }
 }

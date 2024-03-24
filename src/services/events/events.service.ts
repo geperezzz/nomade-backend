@@ -154,6 +154,8 @@ export class EventsService {
         },
         ...selectEventFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedEvent);
   }
 }

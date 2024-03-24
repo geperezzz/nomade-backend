@@ -154,6 +154,8 @@ export class HotelsPerNightService {
         },
         ...selectHotelPerNightEntityFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedHotelPerNight);
   }
 }

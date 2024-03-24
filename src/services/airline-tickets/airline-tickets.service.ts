@@ -154,6 +154,8 @@ export class AirlineTicketsService {
         },
         ...selectAirlineTicketFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedAirlineTicket);
   }
 }

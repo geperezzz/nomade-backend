@@ -36,10 +36,10 @@ export class ServicesService {
     const itemsPerPage = paginationQueryDto['per-page'];
     
     const items =
-    await this.currentTransaction.service.findMany({
-      skip: itemsPerPage * (pageIndex - 1),
-      take: itemsPerPage,
-    });
+      await this.currentTransaction.service.findMany({
+        skip: itemsPerPage * (pageIndex - 1),
+        take: itemsPerPage,
+      });
     
     const itemCount = await this.currentTransaction.service.count();
     
@@ -80,5 +80,14 @@ export class ServicesService {
     }
 
     return updatedService;
+  }
+
+  @Transactional()
+  async remove(id: string): Promise<ServiceEntity> {
+    return await this.currentTransaction.service.delete({
+      where: {
+        id,
+      },
+    });
   }
 }

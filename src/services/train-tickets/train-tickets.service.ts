@@ -154,6 +154,8 @@ export class TrainTicketsService {
         },
         ...selectTrainTicketFields,
       });
+    await this.servicesService.remove(id);
+    
     return rawEntityToEntity(removedTrainTicket);
   }
 }
