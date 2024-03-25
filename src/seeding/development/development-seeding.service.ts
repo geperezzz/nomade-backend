@@ -28,6 +28,8 @@ import { PaymentMethodsService } from 'src/payment-methods/payment-methods.servi
 import { paymentMethodsToSeed } from './seeding-data/payment-methods-to-seed';
 import { OrdersService } from 'src/orders/orders.service';
 import { ordersToSeed } from './seeding-data/orders-to-seed';
+import { paymentsToSeed } from './seeding-data/payments-to-seed';
+import { OrderPaymentsService } from 'src/orders/payments/order-payments.service';
 
 @Injectable()
 export class DevelopmentSeedingService {
@@ -45,12 +47,11 @@ export class DevelopmentSeedingService {
     private packagesService: PackagesService,
     private paymentMethodsService: PaymentMethodsService,
     private ordersService: OrdersService,
+    private orderPaymentsService: OrderPaymentsService,
   ) {}
 
   @Transactional()
-  async seed(
-    _configService: ConfigService<SeedingConfig, true>,
-  ): Promise<void> {
+  async seed(_configService: ConfigService<SeedingConfig, true>): Promise<void> {
     await Promise.all([
       this.seedStaff(),
       this.seedCustomers(),
@@ -59,6 +60,7 @@ export class DevelopmentSeedingService {
     ]);
     await this.seedPackages();
     await this.seedOrders();
+    await this.seedPayments();
   }
 
   @Transactional()
@@ -68,23 +70,23 @@ export class DevelopmentSeedingService {
         const seededEmployee = await this.staffService.create(employee);
 
         await Promise.all(
-          occupations.map(async (occupation) => {
+          occupations.map(async occupation => {
             return await this.staffOccupationsService.create(
               seededEmployee.id,
               occupation,
             );
           }),
         );
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedCustomers(): Promise<void> {
     await Promise.all(
-      customersToSeed.map(async (customer) => {
+      customersToSeed.map(async customer => {
         await this.customersService.create(customer);
-      }),
+      })
     );
   }
 
@@ -100,94 +102,110 @@ export class DevelopmentSeedingService {
       this.seedTrainTickets(),
     ]);
   }
-
+  
   @Transactional()
   private async seedAirlineTickets(): Promise<void> {
     await Promise.all(
-      airlineTicketsToSeed.map(async (airlineTicket) => {
+      airlineTicketsToSeed.map(async airlineTicket => {
         await this.airlineTicketsService.create(airlineTicket);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedBusTickets(): Promise<void> {
     await Promise.all(
-      busTicketsToSeed.map(async (busTicket) => {
+      busTicketsToSeed.map(async busTicket => {
         await this.busTicketsService.create(busTicket);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedCarRentals(): Promise<void> {
     await Promise.all(
-      carRentalsToSeed.map(async (carRental) => {
+      carRentalsToSeed.map(async carRental => {
         await this.carRentalsService.create(carRental);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedEvents(): Promise<void> {
     await Promise.all(
-      eventsToSeed.map(async (event) => {
+      eventsToSeed.map(async event => {
         await this.eventsService.create(event);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedHotelsPerNight(): Promise<void> {
     await Promise.all(
-      hotelsPerNightToSeed.map(async (hotelPerNight) => {
+      hotelsPerNightToSeed.map(async hotelPerNight => {
         await this.hotelsPerNightService.create(hotelPerNight);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedTours(): Promise<void> {
     await Promise.all(
-      toursToSeed.map(async (tour) => {
+      toursToSeed.map(async tour => {
         await this.toursService.create(tour);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedTrainTickets(): Promise<void> {
     await Promise.all(
-      trainTicketsToSeed.map(async (trainTicket) => {
+      trainTicketsToSeed.map(async trainTicket => {
         await this.trainTicketsService.create(trainTicket);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedPackages(): Promise<void> {
     await Promise.all(
-      packagesToSeed.map(async (packageToSeed) => {
+      packagesToSeed.map(async packageToSeed => {
         await this.packagesService.create(packageToSeed);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedPaymentMethods(): Promise<void> {
     await Promise.all(
-      paymentMethodsToSeed.map(async (paymentMethod) => {
+      paymentMethodsToSeed.map(async paymentMethod => {
         await this.paymentMethodsService.create(paymentMethod);
-      }),
+      })
     );
   }
 
   @Transactional()
   private async seedOrders(): Promise<void> {
     await Promise.all(
-      ordersToSeed.map(async (order) => {
+      ordersToSeed.map(async order => {
         await this.ordersService.create(order);
-      }),
-    );
+      })
+    )
+  }
+
+  @Transactional()
+  private async seedPayments(): Promise<void> {
+    await Promise.all(
+      paymentsToSeed.map(async ({ orderId, ...payment }) => {
+        const orderToBePaid = (await this.ordersService.findOne(orderId))!;
+        await this.orderPaymentsService.create(
+          orderId,
+          {
+            ...payment,
+            netAmountPaid: orderToBePaid.price.toNumber(),
+          }
+        );
+      })
+    )
   }
 }

@@ -5,6 +5,7 @@ import { config } from './seeding.config';
 import { SeedingService } from './seeding.service';
 import { ProductionSeedingModule } from './production/production-seeding.module';
 import { DevelopmentSeedingModule } from './development/development-seeding.module';
+import { SeedingController } from './seeding.controller';
 
 @Module({
   imports: [
@@ -14,6 +15,8 @@ import { DevelopmentSeedingModule } from './development/development-seeding.modu
     ProductionSeedingModule,
     DevelopmentSeedingModule,
   ],
+  controllers: [SeedingController],
   providers: [SeedingService],
+  exports: [SeedingService],
 })
 export class SeedingModule {}

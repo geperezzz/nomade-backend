@@ -1,16 +1,17 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { SeedingConfig } from './seeding.config';
 import { ProductionSeedingService } from './production/production-seeding.service';
 import { DevelopmentSeedingService } from './development/development-seeding.service';
+import { Transactional } from '@nestjs-cls/transactional';
 
 interface SeedingImplementation {
   seed(configService: ConfigService<SeedingConfig, true>): Promise<void>;
 }
 
 @Injectable()
-export class SeedingService implements OnModuleInit {
+export class SeedingService {
   implementations: Map<SeedingConfig['databaseSeeding'], SeedingImplementation>;
 
   constructor(
@@ -35,7 +36,7 @@ export class SeedingService implements OnModuleInit {
     ]);
   }
 
-  async onModuleInit(): Promise<void> {
+  async seed(): Promise<void> {
     const databaseSeed = this.configService.get('databaseSeeding', {
       infer: true,
     })!;

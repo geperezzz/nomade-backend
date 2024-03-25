@@ -19,6 +19,7 @@ import { StaffModule } from 'src/staff/staff.module';
 import { AvailableOccupationsModule } from 'src/staff/available-occupations/available-occupations.module';
 import { ProfitsModule } from 'src/profits/profits.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { SeedingModule } from 'src/seeding/seeding.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuthModule } from 'src/auth/auth.module';
       middleware: { mount: true },
     }),
     AuthModule,
+    SeedingModule,
     AvailableOccupationsModule,
     StaffModule,
     CustomersModule,
