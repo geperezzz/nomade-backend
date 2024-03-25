@@ -17,11 +17,9 @@ export class ProfitsService {
   async getTodayProfits(): Promise<ProfitsEntity> {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    console.log('Start of today:', startOfToday.toISOString())
 
     const endOfToday = new Date(startOfToday);
     endOfToday.setHours(23, 59, 59, 999);
-    console.log('End of today:', endOfToday.toISOString())
 
     return await this.getProfitsOverAPeriodOfTime({
       from: startOfToday,
@@ -50,7 +48,8 @@ export class ProfitsService {
     const allPaidOrders = await this.ordersService.findPaidOrders();
     const paidOrdersToConsider = allPaidOrders.filter(order => {
       const timestampOfLastPayment = this.getTimestampOfLastPayment(order);
-      return timestampOfLastPayment >= profitsPeriodQueryDto.from
+      return timestampOfLastPayment !== null
+        && timestampOfLastPayment >= profitsPeriodQueryDto.from
         && timestampOfLastPayment <= profitsPeriodQueryDto.to
     }
     );
@@ -65,7 +64,11 @@ export class ProfitsService {
     return { profits, numberOfPaidOrders, bestSellingServices };
   }
 
-  getTimestampOfLastPayment(order: OrderEntity): Date {
+  getTimestampOfLastPayment(order: OrderEntity): Date | null {
+    if (order.payments.length === 0) {
+      return null;
+    }
+    
     return order.payments
       .reduce(
         (newestPayment, payment) => payment.paymentTimestamp > newestPayment.paymentTimestamp ? payment : newestPayment,
