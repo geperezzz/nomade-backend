@@ -9,7 +9,7 @@ export const busTicketsToSeed = [
     servicePrice: 32,
     serviceTimestamp: new Date('2024-04-30T12:00:00-04:00'),
     arrivalLocation: 'New York, USA',
-    arrivalTimestamp: new Date('2024-04-30T04:00:00-04:00'),
+    arrivalTimestamp: new Date('2024-04-30T16:00:00-04:00'),
     assignedBusSeat: '5B',
     busSeatType: BusSeatType.STANDARD,
     busOperatingCompany: 'Greyhound'
@@ -20,7 +20,7 @@ export const busTicketsToSeed = [
     serviceDescription: 'Travel from Chicago to Detroit with Megabus',
     serviceLocation: 'Chicago, USA',
     servicePrice: 25,
-    serviceTimestamp: new Date('2024-05-01T09:00:00-05:00'),
+    serviceTimestamp: new Date('2024-05-01T09:00:00-04:00'),
     arrivalLocation: 'Detroit, USA',
     arrivalTimestamp: new Date('2024-05-01T14:00:00-04:00'),
     assignedBusSeat: '10A',

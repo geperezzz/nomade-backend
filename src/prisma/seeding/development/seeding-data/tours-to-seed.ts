@@ -17,7 +17,7 @@ export const toursToSeed = [
     servicePrice: 40,
     serviceTimestamp: new Date('2024-07-10T11:00:00+02:00'),
     tourType: 'Historical',
-    endOfTourTimestamp: new Date('2024-07-10T02:00:00+02:00'),
+    endOfTourTimestamp: new Date('2024-07-10T14:00:00+02:00'),
   },
   {
     id: '74ecc603-6429-46fc-b598-2f7bee2ea752',
