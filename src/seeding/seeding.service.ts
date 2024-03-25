@@ -40,6 +40,6 @@ export class SeedingService {
     const databaseSeed = this.configService.get('databaseSeeding', {
       infer: true,
     })!;
-    this.implementations.get(databaseSeed)!.seed(this.configService);
+    await this.implementations.get(databaseSeed)!.seed(this.configService);
   }
 }
