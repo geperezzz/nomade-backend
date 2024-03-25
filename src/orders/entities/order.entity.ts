@@ -8,4 +8,5 @@ export type OrderEntity = Order & {
   orderedPackages: OrderPackageEntity[];
   orderedServices: OrderServiceEntity[];
   payments: OrderPaymentEntity[];
+  isCompletelyPaid: boolean;
 };

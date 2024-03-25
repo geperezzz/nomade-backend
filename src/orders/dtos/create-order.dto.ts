@@ -7,7 +7,8 @@ import { createOrderServiceSchema } from '../services/dtos/create-order-service.
 export const createOrderSchema = orderSchema
   .omit({
     price: true,
-    payments: true
+    payments: true,
+    isCompletelyPaid: true,
   })
   .extend({
     id: orderSchema.shape.id.optional(),

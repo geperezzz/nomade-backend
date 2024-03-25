@@ -17,6 +17,7 @@ export const orderSchema = z.object({
   customerId: customerSchema.shape.id,
   salespersonId: z.string().uuid(),
   placementTimestamp: z.coerce.date(),
+  isCompletelyPaid: z.coerce.boolean(),
 });
 
 export class OrderDto extends createZodDto(orderSchema) {

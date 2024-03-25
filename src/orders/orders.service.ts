@@ -151,23 +151,11 @@ export class OrdersService {
 
   @Transactional()
   async findPaidOrders() {
-    const allOrders = await this.currentTransaction.order.findMany();
-    const paidOrders = await Promise.all(
-      allOrders.filter(async order => {
-        const aggregations = await this.currentTransaction.payment.aggregate({
-          where: {
-            orderId: order.id,
-          },
-          _sum: {
-            netAmountPaid: true,
-          },
-        });
-        return order.price === aggregations._sum.netAmountPaid;
-      })
+    const allRawOrders = await this.currentTransaction.order.findMany();
+    const allOrders = await Promise.all(
+      allRawOrders.map(async order => await this.rawEntityToEntity(order))
     );
-    return await Promise.all(
-      paidOrders.map(async order => await this.rawEntityToEntity(order))
-    );
+    return allOrders.filter(order => order.isCompletelyPaid);
   }
 
   @Transactional()
@@ -238,11 +226,27 @@ export class OrdersService {
       this.orderPaymentsService.findAll(rawOrder.id),
     ]);
     
+    const isCompletelyPaid = await this.isOrderPaid(rawOrder);
+
     return {
       ...rawOrder,
       orderedPackages,
       orderedServices,
       payments,
+      isCompletelyPaid,
     };
+  }
+  
+  @Transactional()
+  private async isOrderPaid(order: OrderRawEntity): Promise<boolean> {
+    const aggregations = await this.currentTransaction.payment.aggregate({
+      where: {
+        orderId: order.id,
+      },
+      _sum: {
+        netAmountPaid: true,
+      },
+    });
+    return order.price === aggregations._sum.netAmountPaid;
   }
 }
