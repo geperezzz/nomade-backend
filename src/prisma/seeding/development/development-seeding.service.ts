@@ -193,7 +193,6 @@ export class DevelopmentSeedingService {
     )
   }
 
-  @Transactional()
   private async seedPayments(): Promise<void> {
     await Promise.all(
       paymentsToSeed.map(async ({ orderId, ...payment }) => {
