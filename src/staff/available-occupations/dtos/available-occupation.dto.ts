@@ -8,7 +8,9 @@ export const availableOccupationSchema = z.object({
   occupationName: z.nativeEnum(StaffOccupationName),
 });
 
-export class AvailableOccupationDto extends createZodDto(availableOccupationSchema) {
+export class AvailableOccupationDto extends createZodDto(
+  availableOccupationSchema,
+) {
   static fromEntity(entity: AvailableOccupationEntity): AvailableOccupationDto {
     return availableOccupationSchema.parse(entity);
   }

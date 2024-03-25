@@ -20,7 +20,7 @@ import { EventsModule } from './events/events.module';
     forwardRef(() => TrainTicketsModule),
     forwardRef(() => ToursModule),
     forwardRef(() => EventsModule),
-    PackagesModule
+    PackagesModule,
   ],
   controllers: [ServicesController],
   providers: [ServicesService],

@@ -27,24 +27,23 @@ export class ServicesService {
       data: createServiceDto,
     });
   }
-  
+
   @Transactional()
   async findMany(
     paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<ServiceEntity>> {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
-    
-    const items =
-      await this.currentTransaction.service.findMany({
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-      });
-    
+
+    const items = await this.currentTransaction.service.findMany({
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
+
     const itemCount = await this.currentTransaction.service.count();
-    
+
     const pageCount = Math.ceil(itemCount / itemsPerPage);
-    
+
     return {
       pageIndex,
       itemsPerPage,
@@ -62,7 +61,7 @@ export class ServicesService {
       },
     });
   }
-    
+
   @Transactional()
   async update(
     id: string,

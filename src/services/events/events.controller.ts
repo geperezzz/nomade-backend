@@ -23,46 +23,31 @@ import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 
 @Controller('services/events')
 @ApiTags('Events')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  async create(
-    @Body() createEventDto: CreateEventDto,
-  ): Promise<EventDto> {
-    const createdEvent = await this.eventsService.create(
-      createEventDto,
-    );
+  async create(@Body() createEventDto: CreateEventDto): Promise<EventDto> {
+    const createdEvent = await this.eventsService.create(createEventDto);
     return EventDto.fromEntity(createdEvent);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<EventDto>> {
     const foundEventsPage =
       await this.eventsService.findMany(paginationQueryDto);
-    const items = foundEventsPage.items.map(
-      EventDto.fromEntity,
-    );
+    const items = foundEventsPage.items.map(EventDto.fromEntity);
 
     return { ...foundEventsPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<EventDto> {
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<EventDto> {
     const foundEvent = await this.eventsService.findOne(id);
 
     if (!foundEvent) {
@@ -79,17 +64,12 @@ export class EventsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateEventDto: UpdateEventDto,
   ): Promise<EventDto> {
-    const updatedEvent = await this.eventsService.update(
-      id,
-      updateEventDto,
-    );
+    const updatedEvent = await this.eventsService.update(id, updateEventDto);
     return EventDto.fromEntity(updatedEvent);
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<EventDto> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<EventDto> {
     const removedEvent = await this.eventsService.remove(id);
     return EventDto.fromEntity(removedEvent);
   }

@@ -50,7 +50,7 @@ export class CustomersController {
 
     return { ...foundCustomersPage, items };
   }
-  
+
   @Get('email/:email')
   async findOneByEmail(@Param('email') email: string): Promise<CustomerDto> {
     const foundCustomer = await this.customersService.findOneByEmail(email);
@@ -63,7 +63,7 @@ export class CustomersController {
     }
     return CustomerDto.fromEntity(foundCustomer);
   }
-  
+
   @Get('dni/:dni')
   async findOneByDni(@Param('dni') dni: string): Promise<CustomerDto> {
     const foundCustomer = await this.customersService.findOneByDni(dni);

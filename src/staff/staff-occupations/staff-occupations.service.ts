@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectTransaction, Transaction, Transactional } from '@nestjs-cls/transactional';
+import {
+  InjectTransaction,
+  Transaction,
+  Transactional,
+} from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
@@ -15,8 +19,11 @@ import { SuperAdminOccupationService } from './superadmin/superadmin-occupation.
 
 @Injectable()
 export class StaffOccupationsService {
-  private implementations: Map<StaffOccupationName, StaffOccupationImplementation>;
-  
+  private implementations: Map<
+    StaffOccupationName,
+    StaffOccupationImplementation
+  >;
+
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
@@ -24,7 +31,10 @@ export class StaffOccupationsService {
     adminOccupationService: AdminOccupationService,
     salespersonOccupationService: SalespersonOccupationService,
   ) {
-    this.implementations = new Map<StaffOccupationName, StaffOccupationImplementation>([
+    this.implementations = new Map<
+      StaffOccupationName,
+      StaffOccupationImplementation
+    >([
       [StaffOccupationName.SUPER_ADMIN, superAdminOccupationService],
       [StaffOccupationName.ADMIN, adminOccupationService],
       [StaffOccupationName.SALESPERSON, salespersonOccupationService],
@@ -34,12 +44,16 @@ export class StaffOccupationsService {
   @Transactional()
   async create(
     employeeId: string,
-    createStaffOccupationDto: CreateStaffOccupationDto
+    createStaffOccupationDto: CreateStaffOccupationDto,
   ): Promise<StaffOccupationEntity> {
-    if (await this.findOne(employeeId, createStaffOccupationDto.occupationName)) {
-      throw new Error(`The employee with ID ${employeeId} already has the ${createStaffOccupationDto.occupationName} occupation`);
+    if (
+      await this.findOne(employeeId, createStaffOccupationDto.occupationName)
+    ) {
+      throw new Error(
+        `The employee with ID ${employeeId} already has the ${createStaffOccupationDto.occupationName} occupation`,
+      );
     }
-    
+
     await this.currentTransaction.employee.update({
       where: {
         id: employeeId,
@@ -68,13 +82,18 @@ export class StaffOccupationsService {
       },
     });
     const occupations = await Promise.all(
-      employee.occupations.map(async (occupationName) => (await this.findOne(employeeId, occupationName))!)
+      employee.occupations.map(
+        async (occupationName) =>
+          (await this.findOne(employeeId, occupationName))!,
+      ),
     );
-    
+
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
-    const items = occupations
-      .slice(itemsPerPage * (pageIndex - 1), itemsPerPage * pageIndex);
+    const items = occupations.slice(
+      itemsPerPage * (pageIndex - 1),
+      itemsPerPage * pageIndex,
+    );
     const itemCount = occupations.length;
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
@@ -90,11 +109,9 @@ export class StaffOccupationsService {
   @Transactional()
   async findOne(
     employeeId: string,
-    occupationName: StaffOccupationName
+    occupationName: StaffOccupationName,
   ): Promise<StaffOccupationEntity | null> {
-    return await this.implementations
-      .get(occupationName)!
-      .find(employeeId);
+    return await this.implementations.get(occupationName)!.find(employeeId);
   }
 
   @Transactional()
@@ -107,7 +124,7 @@ export class StaffOccupationsService {
       .get(occupationName)!
       .update(employeeId, updateStaffOccupationDto);
   }
-  
+
   @Transactional()
   async remove(
     employeeId: string,
@@ -119,7 +136,7 @@ export class StaffOccupationsService {
         deletedAt: null,
       },
     });
-    
+
     await this.currentTransaction.employee.update({
       where: {
         id: employeeId,
@@ -130,7 +147,9 @@ export class StaffOccupationsService {
       },
       data: {
         occupations: {
-          set: employee.occupations.filter(occupationName => occupationName !== occupationNameToRemove),
+          set: employee.occupations.filter(
+            (occupationName) => occupationName !== occupationNameToRemove,
+          ),
         },
       },
     });

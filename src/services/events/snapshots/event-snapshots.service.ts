@@ -24,20 +24,23 @@ export class EventSnapshotsService {
     const originalEvent = await this.eventsService.findOne(eventId);
     if (!originalEvent) {
       throw new Error(
-        `Original event service not found: There is no event service with ID ${eventId}`
+        `Original event service not found: There is no event service with ID ${eventId}`,
       );
     }
 
-    const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
-      data: {
-        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalEvent),
-        serviceType: ServiceType.EVENT,
-        originalServiceId: originalEvent.id,
-      },
-      select: {
-        id: true,
-      }
-    });
+    const { id: snapshotId } =
+      await this.currentTransaction.serviceSnapshot.create({
+        data: {
+          ...serviceSchema
+            .omit({ id: true, serviceType: true })
+            .parse(originalEvent),
+          serviceType: ServiceType.EVENT,
+          originalServiceId: originalEvent.id,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     await this.currentTransaction.eventSnapshot.create({
       data: {

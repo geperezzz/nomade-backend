@@ -22,11 +22,8 @@ import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('packages/:packageId/services')
-@ApiTags('Packages\' services')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@ApiTags("Packages' services")
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class PackageServicesController {
   constructor(
     private readonly packageServicesService: PackageServicesService,
@@ -45,9 +42,7 @@ export class PackageServicesController {
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Query() paginationQueryDto: PaginationQueryDto,
@@ -62,9 +57,7 @@ export class PackageServicesController {
   }
 
   @Get(':serviceId')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findOne(
     @Param('packageId', ParseUUIDPipe) packageId: string,
     @Param('serviceId', ParseUUIDPipe) serviceId: string,

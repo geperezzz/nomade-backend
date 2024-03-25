@@ -23,9 +23,7 @@ import { StaffOccupationName } from './entities/employee.entity';
 
 @Controller('staff')
 @ApiTags('Staff')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN)
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
@@ -33,8 +31,7 @@ export class StaffController {
   async create(
     @Body() createEmployeeDto: CreateEmployeeDto,
   ): Promise<EmployeeDto> {
-    const createdEmployee =
-      await this.staffService.create(createEmployeeDto);
+    const createdEmployee = await this.staffService.create(createEmployeeDto);
     return EmployeeDto.fromEntity(createdEmployee);
   }
 
@@ -42,8 +39,7 @@ export class StaffController {
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<EmployeeDto>> {
-    const foundStaffPage =
-      await this.staffService.findMany(paginationQueryDto);
+    const foundStaffPage = await this.staffService.findMany(paginationQueryDto);
     const items = foundStaffPage.items.map(EmployeeDto.fromEntity);
 
     return { ...foundStaffPage, items };

@@ -2,7 +2,8 @@ export const hotelsPerNightToSeed = [
   {
     id: '68e0d2f5-1c6c-41fb-ab5f-98c9043284f9',
     serviceName: '3 Nights at the Bellagio Hotel',
-    serviceDescription: 'Stay at the Bellagio Hotel for 3 nights in Las Vegas, USA',
+    serviceDescription:
+      'Stay at the Bellagio Hotel for 3 nights in Las Vegas, USA',
     serviceLocation: 'Las Vegas, USA',
     servicePrice: 1500,
     serviceTimestamp: new Date('2024-03-27T07:00:00-07:00'),
@@ -41,7 +42,8 @@ export const hotelsPerNightToSeed = [
   {
     id: '8dbd4104-fd79-4692-9f62-d3878b7d074a',
     serviceName: '5 Nights at the Shangri-La Hotel',
-    serviceDescription: 'Stay at the Shangri-La Hotel for 5 nights in Paris, France',
+    serviceDescription:
+      'Stay at the Shangri-La Hotel for 5 nights in Paris, France',
     serviceLocation: 'Paris, France',
     servicePrice: 3000,
     serviceTimestamp: new Date('2024-04-10T07:00:00+02:00'),
@@ -54,7 +56,8 @@ export const hotelsPerNightToSeed = [
   {
     id: '645eb252-506a-44ef-a4e6-46bbb2863ba6',
     serviceName: '1 Night at the Burj Al Arab Hotel',
-    serviceDescription: 'Stay at the Burj Al Arab Hotel for 1 night in Dubai, UAE',
+    serviceDescription:
+      'Stay at the Burj Al Arab Hotel for 1 night in Dubai, UAE',
     serviceLocation: 'Dubai, UAE',
     servicePrice: 3500,
     serviceTimestamp: new Date('2024-04-16T07:00:00+04:00'),
@@ -67,7 +70,8 @@ export const hotelsPerNightToSeed = [
   {
     id: 'da0177d3-1d97-41a9-84ac-def1200d26b7',
     serviceName: '7 Nights at the Marina Bay Sands Hotel',
-    serviceDescription: 'Stay at the Marina Bay Sands Hotel for 7 nights in Singapore',
+    serviceDescription:
+      'Stay at the Marina Bay Sands Hotel for 7 nights in Singapore',
     serviceLocation: 'Singapore',
     servicePrice: 4000,
     serviceTimestamp: new Date('2024-04-18T07:00:00+08:00'),

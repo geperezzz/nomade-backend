@@ -10,4 +10,6 @@ export const createOrderPaymentSchema = orderPaymentSchema
     paymentNumber: orderPaymentSchema.shape.paymentNumber.optional(),
   });
 
-export class CreateOrderPaymentDto extends createZodDto(createOrderPaymentSchema) {}
+export class CreateOrderPaymentDto extends createZodDto(
+  createOrderPaymentSchema,
+) {}

@@ -12,7 +12,7 @@ export const busTicketsToSeed = [
     arrivalTimestamp: new Date('2024-04-30T16:00:00-04:00'),
     assignedBusSeat: '5B',
     busSeatType: BusSeatType.STANDARD,
-    busOperatingCompany: 'Greyhound'
+    busOperatingCompany: 'Greyhound',
   },
   {
     id: '755e9b86-0cdc-4e2e-a62c-59ec67d5e275',
@@ -25,7 +25,7 @@ export const busTicketsToSeed = [
     arrivalTimestamp: new Date('2024-05-01T14:00:00-04:00'),
     assignedBusSeat: '10A',
     busSeatType: BusSeatType.STANDARD,
-    busOperatingCompany: 'Megabus'
+    busOperatingCompany: 'Megabus',
   },
   {
     id: 'b4f404e9-c19a-4537-a7d8-31f9f8a286d2',
@@ -38,7 +38,7 @@ export const busTicketsToSeed = [
     arrivalTimestamp: new Date('2024-05-02T14:00:00+02:00'),
     assignedBusSeat: '15C',
     busSeatType: BusSeatType.SEMI_BED,
-    busOperatingCompany: 'FlixBus'
+    busOperatingCompany: 'FlixBus',
   },
   {
     id: '633d396a-6276-4544-af28-fd4293d0dc88',
@@ -51,7 +51,7 @@ export const busTicketsToSeed = [
     arrivalTimestamp: new Date('2024-05-03T14:00:00-07:00'),
     assignedBusSeat: '20D',
     busSeatType: BusSeatType.STANDARD,
-    busOperatingCompany: 'BoltBus'
+    busOperatingCompany: 'BoltBus',
   },
   {
     id: '27f7d445-a096-4e70-baae-73e44439b14e',
@@ -64,6 +64,6 @@ export const busTicketsToSeed = [
     arrivalTimestamp: new Date('2024-05-04T18:00:00+02:00'),
     assignedBusSeat: '25E',
     busSeatType: BusSeatType.BED_EXECUTIVE,
-    busOperatingCompany: 'Eurolines'
+    busOperatingCompany: 'Eurolines',
   },
 ] as const;

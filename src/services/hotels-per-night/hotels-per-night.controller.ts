@@ -23,10 +23,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/hotels-per-night')
 @ApiTags('Hotels per night')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class HotelsPerNightController {
   constructor(private readonly hotelsPerNightService: HotelsPerNightService) {}
 
@@ -41,9 +38,7 @@ export class HotelsPerNightController {
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<HotelPerNightDto>> {
@@ -57,9 +52,7 @@ export class HotelsPerNightController {
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<HotelPerNightDto> {

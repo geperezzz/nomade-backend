@@ -2,7 +2,8 @@ export const eventsToSeed = [
   {
     id: 'a79fab47-1c70-4eaf-95af-43c0cce4f50f',
     serviceName: 'Ticket for a Taylor Swift concert in Amsterdam',
-    serviceDescription: 'Attend to a Taylor Swift concert at the Johan Cruyff Arena in Amsterdam',
+    serviceDescription:
+      'Attend to a Taylor Swift concert at the Johan Cruyff Arena in Amsterdam',
     serviceLocation: 'Amsterdam, Netherlands',
     servicePrice: 150,
     serviceTimestamp: new Date('2024-07-04T18:00:00+01:00'),
@@ -32,7 +33,8 @@ export const eventsToSeed = [
   {
     id: '2619fff3-ab86-4e63-9807-c844a4d21b30',
     serviceName: 'Ticket for a Coldplay concert in Paris',
-    serviceDescription: 'Attend to a Coldplay concert at the Stade de France in Paris',
+    serviceDescription:
+      'Attend to a Coldplay concert at the Stade de France in Paris',
     serviceLocation: 'Paris, France',
     servicePrice: 160,
     serviceTimestamp: new Date('2024-07-20T20:00:00+02:00'),
@@ -42,7 +44,8 @@ export const eventsToSeed = [
   {
     id: 'a4559f51-d00a-4300-bb87-24661b54cf29',
     serviceName: 'Ticket for a Ed Sheeran concert in Berlin',
-    serviceDescription: 'Attend to a Ed Sheeran concert at the Olympiastadion in Berlin',
+    serviceDescription:
+      'Attend to a Ed Sheeran concert at the Olympiastadion in Berlin',
     serviceLocation: 'Berlin, Germany',
     servicePrice: 140,
     serviceTimestamp: new Date('2024-07-25T19:00:00+02:00'),

@@ -5,9 +5,9 @@ import { StaffOccupationEntity } from './entities/staff-occupation.entity';
 export interface StaffOccupationImplementation {
   create(
     employeeId: string,
-    createStaffOccupationDto: CreateStaffOccupationDto
+    createStaffOccupationDto: CreateStaffOccupationDto,
   ): Promise<StaffOccupationEntity>;
-  
+
   find(employeeId: string): Promise<StaffOccupationEntity | null>;
 
   update(

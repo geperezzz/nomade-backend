@@ -45,9 +45,7 @@ type CarRentalRawEntity = CarRentalModel & {
   asService: Omit<ServiceModel, 'id' | 'serviceType'>;
 };
 
-function rawEntityToEntity(
-  rawCarRental: CarRentalRawEntity,
-): CarRentalEntity {
+function rawEntityToEntity(rawCarRental: CarRentalRawEntity): CarRentalEntity {
   const { asService: serviceFields, ...carRentalFields } = rawCarRental;
   return { ...serviceFields, ...carRentalFields };
 }
@@ -71,14 +69,13 @@ export class CarRentalsService {
       }), // strip out the CarRental-specific fields
     );
 
-    const createdCarRental =
-      await this.currentTransaction.carRental.create({
-        data: {
-          ...createCarRentalOnlySchema.parse(createCarRentalDto), // strip out the Service-specific fields
-          id: createdService.id,
-        },
-        ...selectCarRentalFields,
-      });
+    const createdCarRental = await this.currentTransaction.carRental.create({
+      data: {
+        ...createCarRentalOnlySchema.parse(createCarRentalDto), // strip out the Service-specific fields
+        id: createdService.id,
+      },
+      ...selectCarRentalFields,
+    });
 
     return rawEntityToEntity(createdCarRental);
   }
@@ -90,12 +87,11 @@ export class CarRentalsService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const rawHotelsPerNight =
-      await this.currentTransaction.carRental.findMany({
-        ...selectCarRentalFields,
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-      });
+    const rawHotelsPerNight = await this.currentTransaction.carRental.findMany({
+      ...selectCarRentalFields,
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
 
     const itemCount = await this.currentTransaction.carRental.count();
@@ -113,13 +109,12 @@ export class CarRentalsService {
 
   @Transactional()
   async findOne(id: string): Promise<CarRentalEntity | null> {
-    const rawCarRental =
-      await this.currentTransaction.carRental.findUnique({
-        where: {
-          id,
-        },
-        ...selectCarRentalFields,
-      });
+    const rawCarRental = await this.currentTransaction.carRental.findUnique({
+      where: {
+        id,
+      },
+      ...selectCarRentalFields,
+    });
     return rawCarRental ? rawEntityToEntity(rawCarRental) : null;
   }
 
@@ -133,29 +128,27 @@ export class CarRentalsService {
       updateServiceSchema.parse(updateCarRentalDto), // strip out the CarRental-specific fields
     );
 
-    const updatedCarRental =
-      await this.currentTransaction.carRental.update({
-        where: {
-          id: updatedService.id,
-        },
-        data: updateCarRentalOnlySchema.parse(updateCarRentalDto), // strip out the Service-specific fields
-        ...selectCarRentalFields,
-      });
+    const updatedCarRental = await this.currentTransaction.carRental.update({
+      where: {
+        id: updatedService.id,
+      },
+      data: updateCarRentalOnlySchema.parse(updateCarRentalDto), // strip out the Service-specific fields
+      ...selectCarRentalFields,
+    });
 
     return rawEntityToEntity(updatedCarRental);
   }
 
   @Transactional()
   async remove(id: string): Promise<CarRentalEntity> {
-    const removedCarRental =
-      await this.currentTransaction.carRental.delete({
-        where: {
-          id,
-        },
-        ...selectCarRentalFields,
-      });
+    const removedCarRental = await this.currentTransaction.carRental.delete({
+      where: {
+        id,
+      },
+      ...selectCarRentalFields,
+    });
     await this.servicesService.remove(id);
-    
+
     return rawEntityToEntity(removedCarRental);
   }
 }

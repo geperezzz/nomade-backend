@@ -34,11 +34,8 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  async create(
-    @Body() createOrderDto: CreateOrderDto,
-  ): Promise<OrderDto> {
-    const createdOrder =
-      await this.ordersService.create(createOrderDto);
+  async create(@Body() createOrderDto: CreateOrderDto): Promise<OrderDto> {
+    const createdOrder = await this.ordersService.create(createOrderDto);
     return OrderDto.fromEntity(createdOrder);
   }
 
@@ -71,10 +68,7 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ): Promise<OrderDto> {
-    const updatedOrder = await this.ordersService.update(
-      id,
-      updateOrderDto,
-    );
+    const updatedOrder = await this.ordersService.update(id, updateOrderDto);
     return OrderDto.fromEntity(updatedOrder);
   }
 
@@ -83,10 +77,7 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() replaceOrderDto: ReplaceOrderDto,
   ): Promise<OrderDto> {
-    const newOrder = await this.ordersService.replace(
-      id,
-      replaceOrderDto,
-    );
+    const newOrder = await this.ordersService.replace(id, replaceOrderDto);
     return OrderDto.fromEntity(newOrder);
   }
 

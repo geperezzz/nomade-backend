@@ -6,11 +6,7 @@ import { ProductionSeedingService } from './production-seeding.service';
 import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
 
 @Module({
-  imports: [
-    StaffModule,
-    StaffOccupationsModule,
-    PaymentMethodsModule,
-  ],
+  imports: [StaffModule, StaffOccupationsModule, PaymentMethodsModule],
   providers: [ProductionSeedingService],
   exports: [ProductionSeedingService],
 })

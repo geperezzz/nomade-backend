@@ -1,12 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
 
-import {
-  createTourOnlySchema,
-  createTourSchema,
-} from './create-tour.dto';
+import { createTourOnlySchema, createTourSchema } from './create-tour.dto';
 
-export const updateTourOnlySchema =
-  createTourOnlySchema.partial();
+export const updateTourOnlySchema = createTourOnlySchema.partial();
 
 export const updateTourSchema = createTourSchema
   .innerType()
@@ -28,6 +24,4 @@ export const updateTourSchema = createTourSchema
     },
   );
 
-export class UpdateTourDto extends createZodDto(
-  updateTourSchema,
-) {}
+export class UpdateTourDto extends createZodDto(updateTourSchema) {}

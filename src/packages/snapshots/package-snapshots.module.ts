@@ -5,10 +5,7 @@ import { PackagesModule } from '../packages.module';
 import { ServiceSnapshotsModule } from 'src/services/snapshots/service-snapshots.module';
 
 @Module({
-  imports: [
-    PackagesModule,
-    ServiceSnapshotsModule,
-  ],
+  imports: [PackagesModule, ServiceSnapshotsModule],
   providers: [PackageSnapshotsService],
   exports: [PackageSnapshotsService],
 })

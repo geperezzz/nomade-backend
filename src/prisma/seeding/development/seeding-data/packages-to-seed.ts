@@ -2,7 +2,8 @@ export const packagesToSeed = [
   {
     id: 'acdd99a9-3406-44ba-8ba5-897e3839c5d0',
     name: '2 Tickets for a Taylor Swift concert in Amsterdam',
-    description: 'Attend to a Taylor Swift concert at the Johan Cruyff Arena in Amsterdam',
+    description:
+      'Attend to a Taylor Swift concert at the Johan Cruyff Arena in Amsterdam',
     appliedDiscountPercentage: 20,
     containedServices: [
       {

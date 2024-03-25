@@ -24,20 +24,23 @@ export class BusTicketSnapshotsService {
     const originalBusTicket = await this.busTicketsService.findOne(busTicketId);
     if (!originalBusTicket) {
       throw new Error(
-        `Original bus ticket service not found: There is no bus ticket service with ID ${busTicketId}`
+        `Original bus ticket service not found: There is no bus ticket service with ID ${busTicketId}`,
       );
     }
 
-    const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
-      data: {
-        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalBusTicket),
-        serviceType: ServiceType.BUS_TICKET,
-        originalServiceId: originalBusTicket.id,
-      },
-      select: {
-        id: true,
-      }
-    });
+    const { id: snapshotId } =
+      await this.currentTransaction.serviceSnapshot.create({
+        data: {
+          ...serviceSchema
+            .omit({ id: true, serviceType: true })
+            .parse(originalBusTicket),
+          serviceType: ServiceType.BUS_TICKET,
+          originalServiceId: originalBusTicket.id,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     await this.currentTransaction.busTicketSnapshot.create({
       data: {

@@ -7,4 +7,4 @@ export type ProfitsEntity = {
     serviceId: string;
     numberOfSales: number;
   }[];
-}
+};

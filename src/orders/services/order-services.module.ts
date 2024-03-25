@@ -6,10 +6,7 @@ import { OrdersModule } from '../orders.module';
 import { ServiceSnapshotsModule } from 'src/services/snapshots/service-snapshots.module';
 
 @Module({
-  imports: [
-    forwardRef(() => OrdersModule),
-    ServiceSnapshotsModule,
-  ],
+  imports: [forwardRef(() => OrdersModule), ServiceSnapshotsModule],
   controllers: [OrderServicesController],
   providers: [OrderServicesService],
   exports: [OrderServicesService],

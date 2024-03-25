@@ -13,15 +13,11 @@ export const tourOnlySchema = z.object({
 export const tourSchema = serviceSchema
   .omit({ serviceType: true })
   .merge(tourOnlySchema)
-  .refine(
-    (tour) =>
-      tour.endOfTourTimestamp > tour.serviceTimestamp,
-    {
-      message:
-        'The end of the tour timestamp must follow the service timestamp (start of the tour timestamp)',
-      path: ['endOfTourTimestamp'],
-    },
-  );
+  .refine((tour) => tour.endOfTourTimestamp > tour.serviceTimestamp, {
+    message:
+      'The end of the tour timestamp must follow the service timestamp (start of the tour timestamp)',
+    path: ['endOfTourTimestamp'],
+  });
 
 export class TourDto extends createZodDto(tourSchema) {
   static fromEntity(entity: TourEntity): TourDto {

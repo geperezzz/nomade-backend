@@ -20,7 +20,9 @@ export class PaymentMethodsService {
   ) {}
 
   @Transactional()
-  async create(createPaymentMethodDto: CreatePaymentMethodDto): Promise<PaymentMethodEntity> {
+  async create(
+    createPaymentMethodDto: CreatePaymentMethodDto,
+  ): Promise<PaymentMethodEntity> {
     return await this.currentTransaction.paymentMethod.create({
       data: createPaymentMethodDto,
     });

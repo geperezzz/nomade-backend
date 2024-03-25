@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
@@ -32,7 +32,10 @@ export class OrderPaymentsService {
   ) {}
 
   @Transactional()
-  async create(orderId: string, createOrderPaymentDto: CreateOrderPaymentDto): Promise<OrderPaymentEntity> {
+  async create(
+    orderId: string,
+    createOrderPaymentDto: CreateOrderPaymentDto,
+  ): Promise<OrderPaymentEntity> {
     const order = await this.currentTransaction.order.findUniqueOrThrow({
       where: {
         id: orderId,
@@ -42,15 +45,20 @@ export class OrderPaymentsService {
       },
     });
     if (createOrderPaymentDto.paymentTimestamp < order.placementTimestamp) {
-      throw new Error('Invalid payment: The payment timestamp is before the order placement timestamp');
+      throw new Error(
+        'Invalid payment: The payment timestamp is before the order placement timestamp',
+      );
     }
-    
-    const appliedCommissionPercentage = await this.getCommissionPercentageOfPaymentMethod(createOrderPaymentDto.paymentMethodId);
+
+    const appliedCommissionPercentage =
+      await this.getCommissionPercentageOfPaymentMethod(
+        createOrderPaymentDto.paymentMethodId,
+      );
     const amountWithCommissionPaid = this.calculateAmountWithCommissionPaid(
       createOrderPaymentDto.netAmountPaid,
       appliedCommissionPercentage,
     );
-    
+
     const createdOrderPayment = await this.currentTransaction.payment.create({
       data: {
         ...createOrderPaymentDto,
@@ -62,7 +70,9 @@ export class OrderPaymentsService {
     });
 
     if (await this.isOrderOverpaid(orderId)) {
-      throw new Error('Invalid payment: If the payment is created, the order would be overpaid');
+      throw new Error(
+        'Invalid payment: If the payment is created, the order would be overpaid',
+      );
     }
     return createdOrderPayment;
   }
@@ -112,7 +122,10 @@ export class OrderPaymentsService {
   }
 
   @Transactional()
-  async findOne(orderId: string, paymentNumber: number): Promise<OrderPaymentEntity | null> {
+  async findOne(
+    orderId: string,
+    paymentNumber: number,
+  ): Promise<OrderPaymentEntity | null> {
     return await this.currentTransaction.payment.findUnique({
       where: {
         orderId_paymentNumber: {
@@ -147,24 +160,29 @@ export class OrderPaymentsService {
         },
       });
       if (updateOrderPaymentDto.paymentTimestamp < order.placementTimestamp) {
-        throw new Error('Invalid payment: The payment timestamp is before the order placement timestamp');
+        throw new Error(
+          'Invalid payment: The payment timestamp is before the order placement timestamp',
+        );
       }
     }
-    
+
     let netAmountPaid!: Decimal;
     if (updateOrderPaymentDto.netAmountPaid) {
       netAmountPaid = new Decimal(updateOrderPaymentDto.netAmountPaid);
     } else {
       netAmountPaid = oldOrderPayment.netAmountPaid;
     }
-    
+
     let appliedCommissionPercentage!: Decimal;
     if (updateOrderPaymentDto.paymentMethodId) {
-      appliedCommissionPercentage = await this.getCommissionPercentageOfPaymentMethod(updateOrderPaymentDto.paymentMethodId);
+      appliedCommissionPercentage =
+        await this.getCommissionPercentageOfPaymentMethod(
+          updateOrderPaymentDto.paymentMethodId,
+        );
     } else {
       appliedCommissionPercentage = oldOrderPayment.appliedCommissionPercentage;
     }
-    
+
     const amountWithCommissionPaid = this.calculateAmountWithCommissionPaid(
       netAmountPaid,
       appliedCommissionPercentage,
@@ -186,37 +204,50 @@ export class OrderPaymentsService {
     });
 
     if (await this.isOrderOverpaid(orderId)) {
-      throw new Error('Invalid payment: If the payment is updated, the order would be overpaid');
+      throw new Error(
+        'Invalid payment: If the payment is updated, the order would be overpaid',
+      );
     }
     return updatedOrderPayment;
   }
 
   @Transactional()
-  private async getCommissionPercentageOfPaymentMethod(paymentMethodId: string): Promise<Decimal> {
-    const { commissionPercentage } = await this.currentTransaction.paymentMethod.findUniqueOrThrow({
-      where: {
-        id: paymentMethodId,
-      },
-      select: {
-        commissionPercentage: true,
-      },
-    });
+  private async getCommissionPercentageOfPaymentMethod(
+    paymentMethodId: string,
+  ): Promise<Decimal> {
+    const { commissionPercentage } =
+      await this.currentTransaction.paymentMethod.findUniqueOrThrow({
+        where: {
+          id: paymentMethodId,
+        },
+        select: {
+          commissionPercentage: true,
+        },
+      });
     return commissionPercentage;
   }
 
-  private calculateAmountWithCommissionPaid(netAmountPaid: Decimal | number, appliedCommissionPercentage: Decimal | number): Decimal {
+  private calculateAmountWithCommissionPaid(
+    netAmountPaid: Decimal | number,
+    appliedCommissionPercentage: Decimal | number,
+  ): Decimal {
     if (typeof netAmountPaid === 'number') {
       netAmountPaid = new Decimal(netAmountPaid);
     }
     if (typeof appliedCommissionPercentage === 'number') {
       appliedCommissionPercentage = new Decimal(appliedCommissionPercentage);
     }
-  
-    return netAmountPaid.mul(Decimal.add(1, appliedCommissionPercentage.div(100)));
+
+    return netAmountPaid.mul(
+      Decimal.add(1, appliedCommissionPercentage.div(100)),
+    );
   }
 
   @Transactional()
-  async remove(orderId: string, paymentNumber: number): Promise<OrderPaymentEntity> {
+  async remove(
+    orderId: string,
+    paymentNumber: number,
+  ): Promise<OrderPaymentEntity> {
     return await this.currentTransaction.payment.delete({
       where: {
         orderId_paymentNumber: {
@@ -240,10 +271,13 @@ export class OrderPaymentsService {
   }
 
   @Transactional()
-  private async calculateNetAmountPaidForOrder(orderId: string): Promise<Decimal> {
+  private async calculateNetAmountPaidForOrder(
+    orderId: string,
+  ): Promise<Decimal> {
     const orderPayments = await this.findAll(orderId);
     return orderPayments.reduce(
-      (netAmountPaid, orderPayment) => netAmountPaid.add(orderPayment.netAmountPaid),
+      (netAmountPaid, orderPayment) =>
+        netAmountPaid.add(orderPayment.netAmountPaid),
       new Decimal(0),
     );
   }

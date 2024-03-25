@@ -1,8 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ServiceDto } from './dtos/service.dto';
@@ -28,9 +24,7 @@ export class ServicesController {
   ): Promise<Page<ServiceDto>> {
     const foundServicesPage =
       await this.servicesService.findMany(paginationQueryDto);
-    const items = foundServicesPage.items.map(
-      ServiceDto.fromEntity,
-    );
+    const items = foundServicesPage.items.map(ServiceDto.fromEntity);
 
     return { ...foundServicesPage, items };
   }

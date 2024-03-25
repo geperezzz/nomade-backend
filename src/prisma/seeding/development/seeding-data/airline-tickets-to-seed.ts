@@ -55,7 +55,8 @@ export const airlineTicketsToSeed = [
   },
   {
     id: '70a53885-5a36-4f2d-b1c7-59c460fadab2',
-    serviceName: 'British Airways airline ticket to travel from London to New York',
+    serviceName:
+      'British Airways airline ticket to travel from London to New York',
     serviceDescription: 'Travel from London to New York with British Airways',
     serviceLocation: 'London, UK',
     servicePrice: 200,

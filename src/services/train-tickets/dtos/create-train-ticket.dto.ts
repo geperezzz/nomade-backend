@@ -1,9 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 
-import {
-  trainTicketOnlySchema,
-  trainTicketSchema,
-} from './train-ticket.dto';
+import { trainTicketOnlySchema, trainTicketSchema } from './train-ticket.dto';
 
 export const createTrainTicketOnlySchema = trainTicketOnlySchema;
 

@@ -45,9 +45,15 @@ export class OrdersService {
         id: true,
       },
     });
-    
-    await this.orderPackagesService.createMany(createdId, createOrderDto.orderedPackages);
-    await this.orderServicesService.createMany(createdId, createOrderDto.orderedServices);
+
+    await this.orderPackagesService.createMany(
+      createdId,
+      createOrderDto.orderedPackages,
+    );
+    await this.orderServicesService.createMany(
+      createdId,
+      createOrderDto.orderedServices,
+    );
 
     return (await this.findOne(createdId))!;
   }
@@ -64,7 +70,7 @@ export class OrdersService {
             packageSnapshot: {
               select: {
                 price: true,
-              }
+              },
             },
             amountOrdered: true,
           },
@@ -74,7 +80,7 @@ export class OrdersService {
             serviceSnapshot: {
               select: {
                 servicePrice: true,
-              }
+              },
             },
             amountOrdered: true,
           },
@@ -84,17 +90,13 @@ export class OrdersService {
 
     const packagesPrice = order.orderedPackages.reduce(
       (accumulatedPrice, { packageSnapshot: currentPackage, amountOrdered }) =>
-        accumulatedPrice.add(
-          currentPackage.price.mul(amountOrdered)
-        ),
+        accumulatedPrice.add(currentPackage.price.mul(amountOrdered)),
       new Decimal(0),
     );
 
     const servicesPrice = order.orderedServices.reduce(
       (accumulatedPrice, { serviceSnapshot: currentService, amountOrdered }) =>
-        accumulatedPrice.add(
-          currentService.servicePrice.mul(amountOrdered)
-        ),
+        accumulatedPrice.add(currentService.servicePrice.mul(amountOrdered)),
       new Decimal(0),
     );
 
@@ -123,7 +125,7 @@ export class OrdersService {
       take: itemsPerPage,
     });
     const items = await Promise.all(
-      rawOrders.map(rawOrder => this.rawEntityToEntity(rawOrder))
+      rawOrders.map((rawOrder) => this.rawEntityToEntity(rawOrder)),
     );
 
     const itemCount = await this.currentTransaction.order.count();
@@ -153,9 +155,9 @@ export class OrdersService {
   async findPaidOrders() {
     const allRawOrders = await this.currentTransaction.order.findMany();
     const allOrders = await Promise.all(
-      allRawOrders.map(async order => await this.rawEntityToEntity(order))
+      allRawOrders.map(async (order) => await this.rawEntityToEntity(order)),
     );
-    return allOrders.filter(order => order.isCompletelyPaid);
+    return allOrders.filter((order) => order.isCompletelyPaid);
   }
 
   @Transactional()
@@ -171,7 +173,7 @@ export class OrdersService {
         ...updateOrderDto,
       },
     });
-    
+
     return await this.rawEntityToEntity(updatedOrder);
   }
 
@@ -197,9 +199,15 @@ export class OrdersService {
         id: true,
       },
     });
-    
-    await this.orderPackagesService.createMany(newId, replaceOrderDto.orderedPackages);
-    await this.orderServicesService.createMany(newId, replaceOrderDto.orderedServices);
+
+    await this.orderPackagesService.createMany(
+      newId,
+      replaceOrderDto.orderedPackages,
+    );
+    await this.orderServicesService.createMany(
+      newId,
+      replaceOrderDto.orderedServices,
+    );
 
     return (await this.findOne(newId))!;
   }
@@ -216,16 +224,12 @@ export class OrdersService {
 
   @Transactional()
   async rawEntityToEntity(rawOrder: OrderRawEntity): Promise<OrderEntity> {
-    const [
-      orderedPackages,
-      orderedServices,
-      payments,
-    ] = await Promise.all([
+    const [orderedPackages, orderedServices, payments] = await Promise.all([
       this.orderPackagesService.findAll(rawOrder.id),
       this.orderServicesService.findAll(rawOrder.id),
       this.orderPaymentsService.findAll(rawOrder.id),
     ]);
-    
+
     const isCompletelyPaid = await this.isOrderPaid(rawOrder);
 
     return {
@@ -236,7 +240,7 @@ export class OrdersService {
       isCompletelyPaid,
     };
   }
-  
+
   @Transactional()
   private async isOrderPaid(order: OrderRawEntity): Promise<boolean> {
     const aggregations = await this.currentTransaction.payment.aggregate({

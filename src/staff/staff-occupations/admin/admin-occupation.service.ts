@@ -22,7 +22,7 @@ export class AdminOccupationService implements StaffOccupationImplementation {
   @Transactional()
   async create(
     _employeeId: string,
-    _createStaffOccupationDto: CreateStaffOccupationDto
+    _createStaffOccupationDto: CreateStaffOccupationDto,
   ): Promise<StaffOccupationEntity> {
     return {
       occupationName: StaffOccupationName.ADMIN,
@@ -50,10 +50,10 @@ export class AdminOccupationService implements StaffOccupationImplementation {
   ): Promise<StaffOccupationEntity> {
     if (!(await this.find(employeeId))) {
       throw new Error(
-        `The Employee with ID ${employeeId} does not have the admin occupation`
+        `The Employee with ID ${employeeId} does not have the admin occupation`,
       );
     }
-    
+
     return {
       occupationName: StaffOccupationName.ADMIN,
     };

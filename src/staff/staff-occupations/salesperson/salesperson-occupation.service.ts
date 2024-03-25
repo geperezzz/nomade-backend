@@ -13,7 +13,9 @@ import { UpdateStaffOccupationDto } from '../dtos/update-staff-occupation.dto';
 import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Injectable()
-export class SalespersonOccupationService implements StaffOccupationImplementation {
+export class SalespersonOccupationService
+  implements StaffOccupationImplementation
+{
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
@@ -22,7 +24,7 @@ export class SalespersonOccupationService implements StaffOccupationImplementati
   @Transactional()
   async create(
     employeeId: string,
-    _createStaffOccupationDto: CreateStaffOccupationDto
+    _createStaffOccupationDto: CreateStaffOccupationDto,
   ): Promise<StaffOccupationEntity> {
     await this.currentTransaction.salesperson.create({
       data: {
@@ -47,7 +49,9 @@ export class SalespersonOccupationService implements StaffOccupationImplementati
       },
     });
 
-    return employee ? { occupationName: StaffOccupationName.SALESPERSON } : null;
+    return employee
+      ? { occupationName: StaffOccupationName.SALESPERSON }
+      : null;
   }
 
   async update(
@@ -56,10 +60,10 @@ export class SalespersonOccupationService implements StaffOccupationImplementati
   ): Promise<StaffOccupationEntity> {
     if (!(await this.find(employeeId))) {
       throw new Error(
-        `The Employee with ID ${employeeId} does not have the salesperson occupation`
+        `The Employee with ID ${employeeId} does not have the salesperson occupation`,
       );
     }
-    
+
     return {
       occupationName: StaffOccupationName.SALESPERSON,
     };

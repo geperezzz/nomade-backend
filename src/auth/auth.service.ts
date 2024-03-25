@@ -20,21 +20,23 @@ export class AuthService {
     if (loginInput.employeeId) {
       employee = await this.staffService.findOne(loginInput.employeeId);
     } else if (loginInput.employeeEmail) {
-      employee = await this.staffService.findOneByEmail(loginInput.employeeEmail);
+      employee = await this.staffService.findOneByEmail(
+        loginInput.employeeEmail,
+      );
     } else {
       employee = await this.staffService.findOneByDni(loginInput.employeeDni!);
     }
-    
+
     if (!employee) {
       throw new Error('Employee not found');
     }
-    if (!await bcrypt.compare(loginInput.password, employee.password)) {
+    if (!(await bcrypt.compare(loginInput.password, employee.password))) {
       throw new Error('Invalid password');
     }
-    
+
     return {
       employee: EmployeeDto.fromEntity(employee),
       token: await this.jwtService.signAsync({ employeeId: employee.id }),
-    }
+    };
   }
 }

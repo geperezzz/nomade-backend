@@ -1,7 +1,10 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
-import { AirplaneCabinType, AirlineTicketEntity } from '../entities/airline-ticket.entity';
+import {
+  AirplaneCabinType,
+  AirlineTicketEntity,
+} from '../entities/airline-ticket.entity';
 import { convertDecimalsToNumbers } from 'src/common/convert-decimals-to-numbers';
 import { serviceSchema } from 'src/services/dtos/service.dto';
 

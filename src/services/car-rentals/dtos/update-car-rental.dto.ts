@@ -5,8 +5,7 @@ import {
   createCarRentalSchema,
 } from './create-car-rental.dto';
 
-export const updateCarRentalOnlySchema =
-  createCarRentalOnlySchema.partial();
+export const updateCarRentalOnlySchema = createCarRentalOnlySchema.partial();
 
 export const updateCarRentalSchema = createCarRentalSchema
   .innerType()
@@ -28,6 +27,4 @@ export const updateCarRentalSchema = createCarRentalSchema
     },
   );
 
-export class UpdateCarRentalDto extends createZodDto(
-  updateCarRentalSchema,
-) {}
+export class UpdateCarRentalDto extends createZodDto(updateCarRentalSchema) {}

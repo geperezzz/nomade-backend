@@ -23,7 +23,7 @@ import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('orders/:orderId/payments')
-@ApiTags('Orders\' payments')
+@ApiTags("Orders' payments")
 @MustBeLoggedInAs(
   StaffOccupationName.SUPER_ADMIN,
   StaffOccupationName.ADMIN,
@@ -37,8 +37,10 @@ export class OrderPaymentsController {
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Body() createOrderServiceDto: CreateOrderPaymentDto,
   ): Promise<OrderPaymentDto> {
-    const createdOrderService =
-      await this.orderPaymentsService.create(orderId, createOrderServiceDto);
+    const createdOrderService = await this.orderPaymentsService.create(
+      orderId,
+      createOrderServiceDto,
+    );
     return OrderPaymentDto.fromEntity(createdOrderService);
   }
 
@@ -47,8 +49,10 @@ export class OrderPaymentsController {
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<OrderPaymentDto>> {
-    const foundOrderPaymentsPage =
-      await this.orderPaymentsService.findMany(orderId, paginationQueryDto);
+    const foundOrderPaymentsPage = await this.orderPaymentsService.findMany(
+      orderId,
+      paginationQueryDto,
+    );
     const items = foundOrderPaymentsPage.items.map(OrderPaymentDto.fromEntity);
 
     return { ...foundOrderPaymentsPage, items };
@@ -59,7 +63,10 @@ export class OrderPaymentsController {
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Param('paymentNumber', ParseIntPipe) paymentNumber: number,
   ): Promise<OrderPaymentDto> {
-    const foundOrderService = await this.orderPaymentsService.findOne(orderId, paymentNumber);
+    const foundOrderService = await this.orderPaymentsService.findOne(
+      orderId,
+      paymentNumber,
+    );
 
     if (!foundOrderService) {
       throw new NotFoundException(
@@ -89,7 +96,10 @@ export class OrderPaymentsController {
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Param('paymentNumber', ParseIntPipe) paymentNumber: number,
   ): Promise<OrderPaymentDto> {
-    const removedOrderService = await this.orderPaymentsService.remove(orderId, paymentNumber);
+    const removedOrderService = await this.orderPaymentsService.remove(
+      orderId,
+      paymentNumber,
+    );
     return OrderPaymentDto.fromEntity(removedOrderService);
   }
 }

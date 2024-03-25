@@ -23,10 +23,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/car-rentals')
 @ApiTags('Car rentals')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class CarRentalsController {
   constructor(private readonly carRentalsService: CarRentalsService) {}
 
@@ -34,35 +31,26 @@ export class CarRentalsController {
   async create(
     @Body() createCarRentalDto: CreateCarRentalDto,
   ): Promise<CarRentalDto> {
-    const createdCarRental = await this.carRentalsService.create(
-      createCarRentalDto,
-    );
+    const createdCarRental =
+      await this.carRentalsService.create(createCarRentalDto);
     return CarRentalDto.fromEntity(createdCarRental);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<CarRentalDto>> {
     const foundCarRentalsPage =
       await this.carRentalsService.findMany(paginationQueryDto);
-    const items = foundCarRentalsPage.items.map(
-      CarRentalDto.fromEntity,
-    );
+    const items = foundCarRentalsPage.items.map(CarRentalDto.fromEntity);
 
     return { ...foundCarRentalsPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<CarRentalDto> {
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<CarRentalDto> {
     const foundCarRental = await this.carRentalsService.findOne(id);
 
     if (!foundCarRental) {
@@ -87,9 +75,7 @@ export class CarRentalsController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<CarRentalDto> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<CarRentalDto> {
     const removedCarRental = await this.carRentalsService.remove(id);
     return CarRentalDto.fromEntity(removedCarRental);
   }

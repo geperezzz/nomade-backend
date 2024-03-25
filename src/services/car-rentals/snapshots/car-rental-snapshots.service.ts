@@ -24,20 +24,23 @@ export class CarRentalSnapshotsService {
     const originalCarRental = await this.carRentalsService.findOne(carRentalId);
     if (!originalCarRental) {
       throw new Error(
-        `Original car rental service not found: There is no Car rental service with ID ${carRentalId}`
+        `Original car rental service not found: There is no Car rental service with ID ${carRentalId}`,
       );
     }
 
-    const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
-      data: {
-        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalCarRental),
-        serviceType: ServiceType.CAR_RENTAL,
-        originalServiceId: originalCarRental.id,
-      },
-      select: {
-        id: true,
-      }
-    });
+    const { id: snapshotId } =
+      await this.currentTransaction.serviceSnapshot.create({
+        data: {
+          ...serviceSchema
+            .omit({ id: true, serviceType: true })
+            .parse(originalCarRental),
+          serviceType: ServiceType.CAR_RENTAL,
+          originalServiceId: originalCarRental.id,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     await this.currentTransaction.carRentalSnapshot.create({
       data: {

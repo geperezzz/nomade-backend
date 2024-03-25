@@ -1,7 +1,7 @@
 import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 export const staffToSeed = [
-  {  
+  {
     id: 'd106759f-f504-4ec2-a2ec-62b80428b353',
     firstName: 'Gabriel',
     lastName: 'Pérez',

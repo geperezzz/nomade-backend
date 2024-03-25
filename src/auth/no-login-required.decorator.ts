@@ -1,5 +1,4 @@
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 
-export const NoLoginRequired = () => applyDecorators(
-  SetMetadata('noAuthRequired', true)
-);
+export const NoLoginRequired = () =>
+  applyDecorators(SetMetadata('noAuthRequired', true));

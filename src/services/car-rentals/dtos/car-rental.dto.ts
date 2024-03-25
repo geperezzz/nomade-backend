@@ -17,8 +17,7 @@ export const carRentalSchema = serviceSchema
   .omit({ serviceType: true })
   .merge(carRentalOnlySchema)
   .refine(
-    (carRental) =>
-      carRental.carReturnTimestamp > carRental.serviceTimestamp,
+    (carRental) => carRental.carReturnTimestamp > carRental.serviceTimestamp,
     {
       message:
         'The car return timestamp must follow the service timestamp (car rental timestamp)',

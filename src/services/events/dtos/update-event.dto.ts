@@ -1,12 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
 
-import {
-  createEventOnlySchema,
-  createEventSchema,
-} from './create-event.dto';
+import { createEventOnlySchema, createEventSchema } from './create-event.dto';
 
-export const updateEventOnlySchema =
-  createEventOnlySchema.partial();
+export const updateEventOnlySchema = createEventOnlySchema.partial();
 
 export const updateEventSchema = createEventSchema
   .innerType()
@@ -28,6 +24,4 @@ export const updateEventSchema = createEventSchema
     },
   );
 
-export class UpdateEventDto extends createZodDto(
-  updateEventSchema,
-) {}
+export class UpdateEventDto extends createZodDto(updateEventSchema) {}

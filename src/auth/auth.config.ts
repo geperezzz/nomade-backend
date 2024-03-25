@@ -7,6 +7,8 @@ export const authenticationConfigSchema = z.object({
 
 export type AuthenticationConfig = z.infer<typeof authenticationConfigSchema>;
 
-export function validate(authenticationConfig: Record<string, any>): AuthenticationConfig {
+export function validate(
+  authenticationConfig: Record<string, any>,
+): AuthenticationConfig {
   return authenticationConfigSchema.parse(authenticationConfig);
 }

@@ -12,7 +12,7 @@ import { PaymentMethodsService } from 'src/payment-methods/payment-methods.servi
 @Injectable()
 export class ProductionSeedingService {
   configService: ConfigService<SeedingConfig, true>;
-  
+
   constructor(
     private staffService: StaffService,
     private staffOccupationsService: StaffOccupationsService,
@@ -22,32 +22,26 @@ export class ProductionSeedingService {
   @Transactional()
   async seed(configService: ConfigService<SeedingConfig, true>): Promise<void> {
     this.configService = configService;
-    await Promise.all([
-      this.seedSuperAdmin(),
-      this.seedPaymentMethods(),
-    ]);
+    await Promise.all([this.seedSuperAdmin(), this.seedPaymentMethods()]);
   }
 
   @Transactional()
   private async seedSuperAdmin(): Promise<void> {
     const superAdminToSeed = this.configService.get('superAdminToSeed' as any);
-    
-    const seededSuperAdmin = await this.staffService.create(
-      superAdminToSeed,
-    );
-    
-    await this.staffOccupationsService.create(
-      seededSuperAdmin.id,
-      { occupationName: StaffOccupationName.SUPER_ADMIN }
-    );
+
+    const seededSuperAdmin = await this.staffService.create(superAdminToSeed);
+
+    await this.staffOccupationsService.create(seededSuperAdmin.id, {
+      occupationName: StaffOccupationName.SUPER_ADMIN,
+    });
   }
 
   @Transactional()
   private async seedPaymentMethods(): Promise<void> {
     await Promise.all(
-      paymentMethodsToSeed.map(async paymentMethod => {
-        await this.paymentMethodsService.create(paymentMethod)
-      })
+      paymentMethodsToSeed.map(async (paymentMethod) => {
+        await this.paymentMethodsService.create(paymentMethod);
+      }),
     );
   }
 }

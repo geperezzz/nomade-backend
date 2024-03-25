@@ -25,10 +25,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('packages')
 @ApiTags('Packages')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 
@@ -41,9 +38,7 @@ export class PackagesController {
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<PackageDto>> {
@@ -55,9 +50,7 @@ export class PackagesController {
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PackageDto> {
     const foundPackage = await this.packagesService.findOne(id);
 

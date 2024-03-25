@@ -23,10 +23,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/airline-tickets')
 @ApiTags('Airline tickets')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class AirlineTicketsController {
   constructor(private readonly airlineTicketsService: AirlineTicketsService) {}
 
@@ -41,9 +38,7 @@ export class AirlineTicketsController {
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<AirlineTicketDto>> {
@@ -57,9 +52,7 @@ export class AirlineTicketsController {
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AirlineTicketDto> {

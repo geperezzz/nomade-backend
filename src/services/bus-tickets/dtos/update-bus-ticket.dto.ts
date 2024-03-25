@@ -5,8 +5,7 @@ import {
   createBusTicketSchema,
 } from './create-bus-ticket.dto';
 
-export const updateBusTicketOnlySchema =
-  createBusTicketOnlySchema.partial();
+export const updateBusTicketOnlySchema = createBusTicketOnlySchema.partial();
 
 export const updateBusTicketSchema = createBusTicketSchema
   .innerType()
@@ -28,6 +27,4 @@ export const updateBusTicketSchema = createBusTicketSchema
     },
   );
 
-export class UpdateBusTicketDto extends createZodDto(
-  updateBusTicketSchema,
-) {}
+export class UpdateBusTicketDto extends createZodDto(updateBusTicketSchema) {}

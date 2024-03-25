@@ -4,4 +4,6 @@ import { createOrderServiceSchema } from './create-order-service.dto';
 
 export const updateOrderServiceSchema = createOrderServiceSchema.partial();
 
-export class UpdateOrderServiceDto extends createZodDto(updateOrderServiceSchema) {}
+export class UpdateOrderServiceDto extends createZodDto(
+  updateOrderServiceSchema,
+) {}

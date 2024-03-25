@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Tour as TourModel,
-  Service as ServiceModel,
-} from '@prisma/client';
+import { Tour as TourModel, Service as ServiceModel } from '@prisma/client';
 import {
   InjectTransaction,
   Transaction,
@@ -10,14 +7,8 @@ import {
 } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 
-import {
-  CreateTourDto,
-  createTourOnlySchema,
-} from './dtos/create-tour.dto';
-import {
-  UpdateTourDto,
-  updateTourOnlySchema,
-} from './dtos/update-tour.dto';
+import { CreateTourDto, createTourOnlySchema } from './dtos/create-tour.dto';
+import { UpdateTourDto, updateTourOnlySchema } from './dtos/update-tour.dto';
 import { PaginationQueryDto } from 'src/common/pagination/pagination-query.dto';
 import { Page } from 'src/common/pagination/page.type';
 import { TourEntity } from './entities/tour.entity';
@@ -45,9 +36,7 @@ type TourRawEntity = TourModel & {
   asService: Omit<ServiceModel, 'id' | 'serviceType'>;
 };
 
-function rawEntityToEntity(
-  rawTour: TourRawEntity,
-): TourEntity {
+function rawEntityToEntity(rawTour: TourRawEntity): TourEntity {
   const { asService: serviceFields, ...tourFields } = rawTour;
   return { ...serviceFields, ...tourFields };
 }
@@ -61,9 +50,7 @@ export class ToursService {
   ) {}
 
   @Transactional()
-  async create(
-    createTourDto: CreateTourDto,
-  ): Promise<TourEntity> {
+  async create(createTourDto: CreateTourDto): Promise<TourEntity> {
     const createdService = await this.servicesService.create(
       createServiceSchema.parse({
         ...createTourDto,
@@ -71,14 +58,13 @@ export class ToursService {
       }), // strip out the Tour-specific fields
     );
 
-    const createdTour =
-      await this.currentTransaction.tour.create({
-        data: {
-          ...createTourOnlySchema.parse(createTourDto), // strip out the Service-specific fields
-          id: createdService.id,
-        },
-        ...selectTourFields,
-      });
+    const createdTour = await this.currentTransaction.tour.create({
+      data: {
+        ...createTourOnlySchema.parse(createTourDto), // strip out the Service-specific fields
+        id: createdService.id,
+      },
+      ...selectTourFields,
+    });
 
     return rawEntityToEntity(createdTour);
   }
@@ -90,12 +76,11 @@ export class ToursService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const rawHotelsPerNight =
-      await this.currentTransaction.tour.findMany({
-        ...selectTourFields,
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-      });
+    const rawHotelsPerNight = await this.currentTransaction.tour.findMany({
+      ...selectTourFields,
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
 
     const itemCount = await this.currentTransaction.tour.count();
@@ -113,49 +98,43 @@ export class ToursService {
 
   @Transactional()
   async findOne(id: string): Promise<TourEntity | null> {
-    const rawTour =
-      await this.currentTransaction.tour.findUnique({
-        where: {
-          id,
-        },
-        ...selectTourFields,
-      });
+    const rawTour = await this.currentTransaction.tour.findUnique({
+      where: {
+        id,
+      },
+      ...selectTourFields,
+    });
     return rawTour ? rawEntityToEntity(rawTour) : null;
   }
 
   @Transactional()
-  async update(
-    id: string,
-    updateTourDto: UpdateTourDto,
-  ): Promise<TourEntity> {
+  async update(id: string, updateTourDto: UpdateTourDto): Promise<TourEntity> {
     const updatedService = await this.servicesService.update(
       id,
       updateServiceSchema.parse(updateTourDto), // strip out the Tour-specific fields
     );
 
-    const updatedTour =
-      await this.currentTransaction.tour.update({
-        where: {
-          id: updatedService.id,
-        },
-        data: updateTourOnlySchema.parse(updateTourDto), // strip out the Service-specific fields
-        ...selectTourFields,
-      });
+    const updatedTour = await this.currentTransaction.tour.update({
+      where: {
+        id: updatedService.id,
+      },
+      data: updateTourOnlySchema.parse(updateTourDto), // strip out the Service-specific fields
+      ...selectTourFields,
+    });
 
     return rawEntityToEntity(updatedTour);
   }
 
   @Transactional()
   async remove(id: string): Promise<TourEntity> {
-    const removedTour =
-      await this.currentTransaction.tour.delete({
-        where: {
-          id,
-        },
-        ...selectTourFields,
-      });
+    const removedTour = await this.currentTransaction.tour.delete({
+      where: {
+        id,
+      },
+      ...selectTourFields,
+    });
     await this.servicesService.remove(id);
-    
+
     return rawEntityToEntity(removedTour);
   }
 }

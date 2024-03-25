@@ -17,8 +17,7 @@ export const busTicketSchema = serviceSchema
   .omit({ serviceType: true })
   .merge(busTicketOnlySchema)
   .refine(
-    (busTicket) =>
-      busTicket.arrivalTimestamp > busTicket.serviceTimestamp,
+    (busTicket) => busTicket.arrivalTimestamp > busTicket.serviceTimestamp,
     {
       message:
         'The bus arrival timestamp must follow the service timestamp (bus departure timestamp)',

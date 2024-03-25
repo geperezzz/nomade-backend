@@ -13,15 +13,11 @@ export const eventOnlySchema = z.object({
 export const eventSchema = serviceSchema
   .omit({ serviceType: true })
   .merge(eventOnlySchema)
-  .refine(
-    (event) =>
-      event.endOfEventTimestamp > event.serviceTimestamp,
-    {
-      message:
-        'The end of the event timestamp must follow the service timestamp (start of the event timestamp)',
-      path: ['endOfEventTimestamp'],
-    },
-  );
+  .refine((event) => event.endOfEventTimestamp > event.serviceTimestamp, {
+    message:
+      'The end of the event timestamp must follow the service timestamp (start of the event timestamp)',
+    path: ['endOfEventTimestamp'],
+  });
 
 export class EventDto extends createZodDto(eventSchema) {
   static fromEntity(entity: EventEntity): EventDto {

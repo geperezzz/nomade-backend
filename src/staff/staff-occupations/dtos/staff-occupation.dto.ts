@@ -16,5 +16,5 @@ export type StaffOccupationDto = z.infer<typeof staffOccupationSchema>;
 export const StaffOccupationDto = {
   fromEntity(entity: StaffOccupationEntity) {
     return staffOccupationSchema.parse(entity);
-  }
-}
+  },
+};

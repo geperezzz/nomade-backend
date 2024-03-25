@@ -23,10 +23,7 @@ import { MustBeLoggedInAs } from 'src/auth/must-be-logged-in-as.decorator';
 
 @Controller('services/bus-tickets')
 @ApiTags('Bus tickets')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class BusTicketsController {
   constructor(private readonly busTicketsService: BusTicketsService) {}
 
@@ -34,35 +31,26 @@ export class BusTicketsController {
   async create(
     @Body() createBusTicketDto: CreateBusTicketDto,
   ): Promise<BusTicketDto> {
-    const createdBusTicket = await this.busTicketsService.create(
-      createBusTicketDto,
-    );
+    const createdBusTicket =
+      await this.busTicketsService.create(createBusTicketDto);
     return BusTicketDto.fromEntity(createdBusTicket);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<BusTicketDto>> {
     const foundBusTicketsPage =
       await this.busTicketsService.findMany(paginationQueryDto);
-    const items = foundBusTicketsPage.items.map(
-      BusTicketDto.fromEntity,
-    );
+    const items = foundBusTicketsPage.items.map(BusTicketDto.fromEntity);
 
     return { ...foundBusTicketsPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<BusTicketDto> {
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<BusTicketDto> {
     const foundBusTicket = await this.busTicketsService.findOne(id);
 
     if (!foundBusTicket) {
@@ -87,9 +75,7 @@ export class BusTicketsController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<BusTicketDto> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<BusTicketDto> {
     const removedBusTicket = await this.busTicketsService.remove(id);
     return BusTicketDto.fromEntity(removedBusTicket);
   }

@@ -24,20 +24,23 @@ export class TourSnapshotsService {
     const originalTour = await this.toursService.findOne(tourId);
     if (!originalTour) {
       throw new Error(
-        `Original tour service not found: There is no tour service with ID ${tourId}`
+        `Original tour service not found: There is no tour service with ID ${tourId}`,
       );
     }
 
-    const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
-      data: {
-        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalTour),
-        serviceType: ServiceType.TOUR,
-        originalServiceId: originalTour.id,
-      },
-      select: {
-        id: true,
-      }
-    });
+    const { id: snapshotId } =
+      await this.currentTransaction.serviceSnapshot.create({
+        data: {
+          ...serviceSchema
+            .omit({ id: true, serviceType: true })
+            .parse(originalTour),
+          serviceType: ServiceType.TOUR,
+          originalServiceId: originalTour.id,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     await this.currentTransaction.tourSnapshot.create({
       data: {

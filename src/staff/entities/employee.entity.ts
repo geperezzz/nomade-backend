@@ -1,4 +1,7 @@
-import { Employee as EmployeeModel, EmployeeOccupation as PrismaEmployeeOccupation } from '@prisma/client';
+import {
+  Employee as EmployeeModel,
+  EmployeeOccupation as PrismaEmployeeOccupation,
+} from '@prisma/client';
 
 import { StaffOccupationEntity } from '../staff-occupations/entities/staff-occupation.entity';
 

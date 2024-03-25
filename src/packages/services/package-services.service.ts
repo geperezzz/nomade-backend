@@ -34,7 +34,9 @@ export class PackageServicesService {
     packageId: string,
     createPackageServiceDto: CreatePackageServiceDto,
   ): Promise<PackageServiceEntity> {
-    const [createdPackageService] = await this.createMany(packageId, [createPackageServiceDto]);
+    const [createdPackageService] = await this.createMany(packageId, [
+      createPackageServiceDto,
+    ]);
     return createdPackageService;
   }
 
@@ -53,8 +55,8 @@ export class PackageServicesService {
               amountContained: createPackageServiceDto.amountContained,
             },
             ...selectPackageServiceEntityFields,
-          })
-      )
+          }),
+      ),
     );
     await this.packagesService.updatePriceOfPackage(packageId);
     return createdPackageServices;

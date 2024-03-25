@@ -7,7 +7,7 @@ export const ordersToSeed = [
       {
         packageId: '9eae7004-c1ed-4ce3-85be-e05912af496a',
         amountOrdered: 1,
-      }
+      },
     ],
     orderedServices: [],
     placementTimestamp: new Date('2024-03-25T10:00:00-04:00'),
@@ -73,7 +73,7 @@ export const ordersToSeed = [
       {
         serviceId: '68e0d2f5-1c6c-41fb-ab5f-98c9043284f9',
         amountOrdered: 2,
-      }
+      },
     ],
     placementTimestamp: new Date('2024-02-25T10:00:00-04:00'),
   },

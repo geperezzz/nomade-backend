@@ -10,14 +10,12 @@ export const orderPackageSchema = z.object({
   packageId: packageSchema.shape.id.optional(),
   packageSnapshot: packageSchema.extend({
     containedServices: z.array(
-      packageServiceSchema
-        .omit({ service: true })
-        .extend({
-          serviceId: serviceSchema.shape.id.optional(),
-          serviceSnapshot: serviceSchema.extend({
-            snapshotTimestamp: z.coerce.date(),
-          }),
-        })
+      packageServiceSchema.omit({ service: true }).extend({
+        serviceId: serviceSchema.shape.id.optional(),
+        serviceSnapshot: serviceSchema.extend({
+          snapshotTimestamp: z.coerce.date(),
+        }),
+      }),
     ),
     snapshotTimestamp: z.coerce.date(),
   }),

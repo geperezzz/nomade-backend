@@ -1,9 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 
-import {
-  busTicketOnlySchema,
-  busTicketSchema,
-} from './bus-ticket.dto';
+import { busTicketOnlySchema, busTicketSchema } from './bus-ticket.dto';
 
 export const createBusTicketOnlySchema = busTicketOnlySchema;
 
@@ -13,8 +10,7 @@ export const createBusTicketSchema = busTicketSchema
     id: busTicketSchema.innerType().shape.id.optional(),
   })
   .refine(
-    (busTicket) =>
-      busTicket.arrivalTimestamp > busTicket.serviceTimestamp,
+    (busTicket) => busTicket.arrivalTimestamp > busTicket.serviceTimestamp,
     {
       message:
         'The bus arrival timestamp must follow the service timestamp (bus departure timestamp)',
@@ -22,6 +18,4 @@ export const createBusTicketSchema = busTicketSchema
     },
   );
 
-export class CreateBusTicketDto extends createZodDto(
-  createBusTicketSchema,
-) {}
+export class CreateBusTicketDto extends createZodDto(createBusTicketSchema) {}

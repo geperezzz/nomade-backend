@@ -48,7 +48,10 @@ export class PackagesService {
     });
 
     if (createPackageDto.containedServices) {
-      await this.packageServicesService.createMany(id, createPackageDto.containedServices);
+      await this.packageServicesService.createMany(
+        id,
+        createPackageDto.containedServices,
+      );
     }
     return (await this.findOne(id))!;
   }
@@ -123,7 +126,7 @@ export class PackagesService {
         ...replacePackageDto,
         containedServices: {
           deleteMany: {},
-        }
+        },
       },
       select: {
         id: true,
@@ -131,7 +134,10 @@ export class PackagesService {
     });
 
     if (replacePackageDto.containedServices) {
-      await this.packageServicesService.createMany(newId, replacePackageDto.containedServices);
+      await this.packageServicesService.createMany(
+        newId,
+        replacePackageDto.containedServices,
+      );
     }
     return (await this.findOne(newId))!;
   }

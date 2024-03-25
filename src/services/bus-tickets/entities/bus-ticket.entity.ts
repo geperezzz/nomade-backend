@@ -4,10 +4,7 @@ import {
   BusSeatType as PrismaBusSeatType,
 } from '@prisma/client';
 
-export type BusTicketEntity = Omit<
-  ServiceModel,
-  'id' | 'serviceType'
-> &
+export type BusTicketEntity = Omit<ServiceModel, 'id' | 'serviceType'> &
   BusTicketModel;
 
 export type BusSeatType = PrismaBusSeatType;

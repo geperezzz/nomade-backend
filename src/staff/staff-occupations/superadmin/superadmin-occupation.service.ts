@@ -13,7 +13,9 @@ import { UpdateStaffOccupationDto } from '../dtos/update-staff-occupation.dto';
 import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Injectable()
-export class SuperAdminOccupationService implements StaffOccupationImplementation {
+export class SuperAdminOccupationService
+  implements StaffOccupationImplementation
+{
   constructor(
     @InjectTransaction()
     private currentTransaction: Transaction<TransactionalAdapterPrisma>,
@@ -22,7 +24,7 @@ export class SuperAdminOccupationService implements StaffOccupationImplementatio
   @Transactional()
   async create(
     _employeeId: string,
-    _createStaffOccupationDto: CreateStaffOccupationDto
+    _createStaffOccupationDto: CreateStaffOccupationDto,
   ): Promise<StaffOccupationEntity> {
     return {
       occupationName: StaffOccupationName.SUPER_ADMIN,
@@ -41,7 +43,9 @@ export class SuperAdminOccupationService implements StaffOccupationImplementatio
       },
     });
 
-    return employee ? { occupationName: StaffOccupationName.SUPER_ADMIN } : null;
+    return employee
+      ? { occupationName: StaffOccupationName.SUPER_ADMIN }
+      : null;
   }
 
   async update(
@@ -50,17 +54,17 @@ export class SuperAdminOccupationService implements StaffOccupationImplementatio
   ): Promise<StaffOccupationEntity> {
     if (!(await this.find(employeeId))) {
       throw new Error(
-        `The Employee with ID ${employeeId} does not have the super admin occupation`
+        `The Employee with ID ${employeeId} does not have the super admin occupation`,
       );
     }
-    
+
     return {
       occupationName: StaffOccupationName.SUPER_ADMIN,
     };
   }
 
   @Transactional()
-  async remove(_employeeId: string): Promise<StaffOccupationEntity> {    
+  async remove(_employeeId: string): Promise<StaffOccupationEntity> {
     return {
       occupationName: StaffOccupationName.SUPER_ADMIN,
     };

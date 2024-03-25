@@ -45,9 +45,7 @@ type BusTicketRawEntity = BusTicketModel & {
   asService: Omit<ServiceModel, 'id' | 'serviceType'>;
 };
 
-function rawEntityToEntity(
-  rawBusTicket: BusTicketRawEntity,
-): BusTicketEntity {
+function rawEntityToEntity(rawBusTicket: BusTicketRawEntity): BusTicketEntity {
   const { asService: serviceFields, ...busTicketFields } = rawBusTicket;
   return { ...serviceFields, ...busTicketFields };
 }
@@ -71,14 +69,13 @@ export class BusTicketsService {
       }), // strip out the BusTicket-specific fields
     );
 
-    const createdBusTicket =
-      await this.currentTransaction.busTicket.create({
-        data: {
-          ...createBusTicketOnlySchema.parse(createBusTicketDto), // strip out the Service-specific fields
-          id: createdService.id,
-        },
-        ...selectBusTicketFields,
-      });
+    const createdBusTicket = await this.currentTransaction.busTicket.create({
+      data: {
+        ...createBusTicketOnlySchema.parse(createBusTicketDto), // strip out the Service-specific fields
+        id: createdService.id,
+      },
+      ...selectBusTicketFields,
+    });
 
     return rawEntityToEntity(createdBusTicket);
   }
@@ -90,12 +87,11 @@ export class BusTicketsService {
     const pageIndex = paginationQueryDto.page;
     const itemsPerPage = paginationQueryDto['per-page'];
 
-    const rawHotelsPerNight =
-      await this.currentTransaction.busTicket.findMany({
-        ...selectBusTicketFields,
-        skip: itemsPerPage * (pageIndex - 1),
-        take: itemsPerPage,
-      });
+    const rawHotelsPerNight = await this.currentTransaction.busTicket.findMany({
+      ...selectBusTicketFields,
+      skip: itemsPerPage * (pageIndex - 1),
+      take: itemsPerPage,
+    });
     const items = rawHotelsPerNight.map(rawEntityToEntity);
 
     const itemCount = await this.currentTransaction.busTicket.count();
@@ -113,13 +109,12 @@ export class BusTicketsService {
 
   @Transactional()
   async findOne(id: string): Promise<BusTicketEntity | null> {
-    const rawBusTicket =
-      await this.currentTransaction.busTicket.findUnique({
-        where: {
-          id,
-        },
-        ...selectBusTicketFields,
-      });
+    const rawBusTicket = await this.currentTransaction.busTicket.findUnique({
+      where: {
+        id,
+      },
+      ...selectBusTicketFields,
+    });
     return rawBusTicket ? rawEntityToEntity(rawBusTicket) : null;
   }
 
@@ -133,29 +128,27 @@ export class BusTicketsService {
       updateServiceSchema.parse(updateBusTicketDto), // strip out the BusTicket-specific fields
     );
 
-    const updatedBusTicket =
-      await this.currentTransaction.busTicket.update({
-        where: {
-          id: updatedService.id,
-        },
-        data: updateBusTicketOnlySchema.parse(updateBusTicketDto), // strip out the Service-specific fields
-        ...selectBusTicketFields,
-      });
+    const updatedBusTicket = await this.currentTransaction.busTicket.update({
+      where: {
+        id: updatedService.id,
+      },
+      data: updateBusTicketOnlySchema.parse(updateBusTicketDto), // strip out the Service-specific fields
+      ...selectBusTicketFields,
+    });
 
     return rawEntityToEntity(updatedBusTicket);
   }
 
   @Transactional()
   async remove(id: string): Promise<BusTicketEntity> {
-    const removedBusTicket =
-      await this.currentTransaction.busTicket.delete({
-        where: {
-          id,
-        },
-        ...selectBusTicketFields,
-      });
+    const removedBusTicket = await this.currentTransaction.busTicket.delete({
+      where: {
+        id,
+      },
+      ...selectBusTicketFields,
+    });
     await this.servicesService.remove(id);
-    
+
     return rawEntityToEntity(removedBusTicket);
   }
 }

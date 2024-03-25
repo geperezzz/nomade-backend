@@ -21,23 +21,27 @@ export class AirlineTicketSnapshotsService {
 
   @Transactional()
   async createSnapshotOf(airlineTicketId: string): Promise<string> {
-    const originalAirlineTicket = await this.airlineTicketsService.findOne(airlineTicketId);
+    const originalAirlineTicket =
+      await this.airlineTicketsService.findOne(airlineTicketId);
     if (!originalAirlineTicket) {
       throw new Error(
-        `Original airline ticket service not found: There is no airline ticket service with ID ${airlineTicketId}`
+        `Original airline ticket service not found: There is no airline ticket service with ID ${airlineTicketId}`,
       );
     }
 
-    const { id: snapshotId } = await this.currentTransaction.serviceSnapshot.create({
-      data: {
-        ...serviceSchema.omit({ id: true, serviceType: true }).parse(originalAirlineTicket),
-        serviceType: ServiceType.AIRLINE_TICKET,
-        originalServiceId: originalAirlineTicket.id,
-      },
-      select: {
-        id: true,
-      }
-    });
+    const { id: snapshotId } =
+      await this.currentTransaction.serviceSnapshot.create({
+        data: {
+          ...serviceSchema
+            .omit({ id: true, serviceType: true })
+            .parse(originalAirlineTicket),
+          serviceType: ServiceType.AIRLINE_TICKET,
+          originalServiceId: originalAirlineTicket.id,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     await this.currentTransaction.airlineTicketSnapshot.create({
       data: {

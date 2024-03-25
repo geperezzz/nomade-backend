@@ -1,9 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 
-import {
-  carRentalOnlySchema,
-  carRentalSchema,
-} from './car-rental.dto';
+import { carRentalOnlySchema, carRentalSchema } from './car-rental.dto';
 
 export const createCarRentalOnlySchema = carRentalOnlySchema;
 
@@ -13,8 +10,7 @@ export const createCarRentalSchema = carRentalSchema
     id: carRentalSchema.innerType().shape.id.optional(),
   })
   .refine(
-    (carRental) =>
-      carRental.carReturnTimestamp > carRental.serviceTimestamp,
+    (carRental) => carRental.carReturnTimestamp > carRental.serviceTimestamp,
     {
       message:
         'The car return timestamp must follow the service timestamp (car rental timestamp)',
@@ -22,6 +18,4 @@ export const createCarRentalSchema = carRentalSchema
     },
   );
 
-export class CreateCarRentalDto extends createZodDto(
-  createCarRentalSchema,
-) {}
+export class CreateCarRentalDto extends createZodDto(createCarRentalSchema) {}

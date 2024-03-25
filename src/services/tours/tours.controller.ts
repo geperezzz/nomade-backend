@@ -23,46 +23,30 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/tours')
 @ApiTags('Tours')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
   @Post()
-  async create(
-    @Body() createTourDto: CreateTourDto,
-  ): Promise<TourDto> {
-    const createdTour = await this.toursService.create(
-      createTourDto,
-    );
+  async create(@Body() createTourDto: CreateTourDto): Promise<TourDto> {
+    const createdTour = await this.toursService.create(createTourDto);
     return TourDto.fromEntity(createdTour);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<TourDto>> {
-    const foundToursPage =
-      await this.toursService.findMany(paginationQueryDto);
-    const items = foundToursPage.items.map(
-      TourDto.fromEntity,
-    );
+    const foundToursPage = await this.toursService.findMany(paginationQueryDto);
+    const items = foundToursPage.items.map(TourDto.fromEntity);
 
     return { ...foundToursPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<TourDto> {
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<TourDto> {
     const foundTour = await this.toursService.findOne(id);
 
     if (!foundTour) {
@@ -79,17 +63,12 @@ export class ToursController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTourDto: UpdateTourDto,
   ): Promise<TourDto> {
-    const updatedTour = await this.toursService.update(
-      id,
-      updateTourDto,
-    );
+    const updatedTour = await this.toursService.update(id, updateTourDto);
     return TourDto.fromEntity(updatedTour);
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<TourDto> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<TourDto> {
     const removedTour = await this.toursService.remove(id);
     return TourDto.fromEntity(removedTour);
   }

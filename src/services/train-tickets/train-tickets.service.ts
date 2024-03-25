@@ -71,14 +71,15 @@ export class TrainTicketsService {
       }), // strip out the TrainTicket-specific fields
     );
 
-    const createdTrainTicket =
-      await this.currentTransaction.trainTicket.create({
+    const createdTrainTicket = await this.currentTransaction.trainTicket.create(
+      {
         data: {
           ...createTrainTicketOnlySchema.parse(createTrainTicketDto), // strip out the Service-specific fields
           id: createdService.id,
         },
         ...selectTrainTicketFields,
-      });
+      },
+    );
 
     return rawEntityToEntity(createdTrainTicket);
   }
@@ -113,13 +114,14 @@ export class TrainTicketsService {
 
   @Transactional()
   async findOne(id: string): Promise<TrainTicketEntity | null> {
-    const rawTrainTicket =
-      await this.currentTransaction.trainTicket.findUnique({
+    const rawTrainTicket = await this.currentTransaction.trainTicket.findUnique(
+      {
         where: {
           id,
         },
         ...selectTrainTicketFields,
-      });
+      },
+    );
     return rawTrainTicket ? rawEntityToEntity(rawTrainTicket) : null;
   }
 
@@ -133,29 +135,31 @@ export class TrainTicketsService {
       updateServiceSchema.parse(updateTrainTicketDto), // strip out the TrainTicket-specific fields
     );
 
-    const updatedTrainTicket =
-      await this.currentTransaction.trainTicket.update({
+    const updatedTrainTicket = await this.currentTransaction.trainTicket.update(
+      {
         where: {
           id: updatedService.id,
         },
         data: updateTrainTicketOnlySchema.parse(updateTrainTicketDto), // strip out the Service-specific fields
         ...selectTrainTicketFields,
-      });
+      },
+    );
 
     return rawEntityToEntity(updatedTrainTicket);
   }
 
   @Transactional()
   async remove(id: string): Promise<TrainTicketEntity> {
-    const removedTrainTicket =
-      await this.currentTransaction.trainTicket.delete({
+    const removedTrainTicket = await this.currentTransaction.trainTicket.delete(
+      {
         where: {
           id,
         },
         ...selectTrainTicketFields,
-      });
+      },
+    );
     await this.servicesService.remove(id);
-    
+
     return rawEntityToEntity(removedTrainTicket);
   }
 }

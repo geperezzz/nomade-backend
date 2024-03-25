@@ -23,10 +23,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('payment-methods')
 @ApiTags('Payment methods')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class PaymentMethodsController {
   constructor(private readonly paymentMethodsService: PaymentMethodsService) {}
 
@@ -34,30 +31,31 @@ export class PaymentMethodsController {
   async create(
     @Body() createPaymentMethodDto: CreatePaymentMethodDto,
   ): Promise<PaymentMethodDto> {
-    const createdPaymentMethod =
-      await this.paymentMethodsService.create(createPaymentMethodDto);
+    const createdPaymentMethod = await this.paymentMethodsService.create(
+      createPaymentMethodDto,
+    );
     return PaymentMethodDto.fromEntity(createdPaymentMethod);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<PaymentMethodDto>> {
     const foundPaymentMethodsPage =
       await this.paymentMethodsService.findMany(paginationQueryDto);
-    const items = foundPaymentMethodsPage.items.map(PaymentMethodDto.fromEntity);
+    const items = foundPaymentMethodsPage.items.map(
+      PaymentMethodDto.fromEntity,
+    );
 
     return { ...foundPaymentMethodsPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PaymentMethodDto> {
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PaymentMethodDto> {
     const foundPaymentMethod = await this.paymentMethodsService.findOne(id);
 
     if (!foundPaymentMethod) {
@@ -82,7 +80,9 @@ export class PaymentMethodsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<PaymentMethodDto> {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PaymentMethodDto> {
     const removedPaymentMethod = await this.paymentMethodsService.remove(id);
     return PaymentMethodDto.fromEntity(removedPaymentMethod);
   }

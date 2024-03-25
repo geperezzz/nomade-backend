@@ -15,9 +15,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
   StaffOccupationName.SALESPERSON,
 )
 export class ProfitsController {
-  constructor(
-    private profitsService: ProfitsService,
-  ) {}
+  constructor(private profitsService: ProfitsService) {}
 
   @Get('today')
   async getTodayProfits(): Promise<ProfitsDto> {
@@ -27,15 +25,18 @@ export class ProfitsController {
 
   @Get('current-month')
   async getCurrentMonthProfits(): Promise<ProfitsDto> {
-    const currentMonthProfits = await this.profitsService.getCurrentMonthProfits();
+    const currentMonthProfits =
+      await this.profitsService.getCurrentMonthProfits();
     return ProfitsDto.fromEntity(currentMonthProfits);
   }
 
   @Get()
   async getProfitsOverAPeriodOfTime(
-    @Query() profitsPeriodQueryDto: ProfitsPeriodQueryDto, 
+    @Query() profitsPeriodQueryDto: ProfitsPeriodQueryDto,
   ): Promise<ProfitsDto> {
-    const profits = await this.profitsService.getProfitsOverAPeriodOfTime(profitsPeriodQueryDto);
+    const profits = await this.profitsService.getProfitsOverAPeriodOfTime(
+      profitsPeriodQueryDto,
+    );
     return ProfitsDto.fromEntity(profits);
   }
 }

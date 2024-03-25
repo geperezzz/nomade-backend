@@ -9,9 +9,7 @@ import { OrderEntity } from 'src/orders/entities/order.entity';
 
 @Injectable()
 export class ProfitsService {
-  constructor(
-    private ordersService: OrdersService,
-  ) {}
+  constructor(private ordersService: OrdersService) {}
 
   @Transactional()
   async getTodayProfits(): Promise<ProfitsEntity> {
@@ -30,7 +28,7 @@ export class ProfitsService {
   @Transactional()
   async getCurrentMonthProfits(): Promise<ProfitsEntity> {
     const now = new Date();
-    
+
     const startOfCurrentMonth = new Date(now);
     startOfCurrentMonth.setDate(1);
     startOfCurrentMonth.setHours(0, 0, 0, 0);
@@ -46,21 +44,23 @@ export class ProfitsService {
     profitsPeriodQueryDto: ProfitsPeriodQueryDto,
   ): Promise<ProfitsEntity> {
     const allPaidOrders = await this.ordersService.findPaidOrders();
-    const paidOrdersToConsider = allPaidOrders.filter(order => {
+    const paidOrdersToConsider = allPaidOrders.filter((order) => {
       const timestampOfLastPayment = this.getTimestampOfLastPayment(order);
-      return timestampOfLastPayment !== null
-        && timestampOfLastPayment >= profitsPeriodQueryDto.from
-        && timestampOfLastPayment <= profitsPeriodQueryDto.to
-    }
-    );
+      return (
+        timestampOfLastPayment !== null &&
+        timestampOfLastPayment >= profitsPeriodQueryDto.from &&
+        timestampOfLastPayment <= profitsPeriodQueryDto.to
+      );
+    });
 
-    const bestSellingServices = this.getBestSellingServices(paidOrdersToConsider);
+    const bestSellingServices =
+      this.getBestSellingServices(paidOrdersToConsider);
     const profits = paidOrdersToConsider.reduce(
       (profits, order) => profits.add(order.price),
       new Decimal(0),
     );
     const numberOfPaidOrders = paidOrdersToConsider.length;
-    
+
     return { profits, numberOfPaidOrders, bestSellingServices };
   }
 
@@ -68,35 +68,33 @@ export class ProfitsService {
     if (order.payments.length === 0) {
       return null;
     }
-    
-    return order.payments
-      .reduce(
-        (newestPayment, payment) => payment.paymentTimestamp > newestPayment.paymentTimestamp ? payment : newestPayment,
-      )
-      .paymentTimestamp;
+
+    return order.payments.reduce((newestPayment, payment) =>
+      payment.paymentTimestamp > newestPayment.paymentTimestamp
+        ? payment
+        : newestPayment,
+    ).paymentTimestamp;
   }
 
   getBestSellingServices(orders: OrderEntity[]) {
     const NUMBER_OF_BEST_SELLING_SERVICES = 5;
-    
+
     const orderedServices = orders
-      .map(
-        order => order.orderedServices.map(
-          orderedService => orderedService.serviceId
-        )
+      .map((order) =>
+        order.orderedServices.map((orderedService) => orderedService.serviceId),
       )
       .flat()
       .filter((serviceId): serviceId is string => serviceId !== null);
 
     const orderedPackageServices = orders
-      .map(
-        order => order.orderedPackages
-          .map(
-            orderedPackage => orderedPackage.packageSnapshot.containedServices.map(
-              containedService => containedService.serviceId
-            )
+      .map((order) =>
+        order.orderedPackages
+          .map((orderedPackage) =>
+            orderedPackage.packageSnapshot.containedServices.map(
+              (containedService) => containedService.serviceId,
+            ),
           )
-          .flat()
+          .flat(),
       )
       .flat()
       .filter((serviceId): serviceId is string => serviceId !== null);
@@ -106,12 +104,14 @@ export class ProfitsService {
       (numberOfOrdersPerService, serviceId) =>
         numberOfOrdersPerService.set(
           serviceId,
-          (numberOfOrdersPerService.get(serviceId) || 0) + 1
+          (numberOfOrdersPerService.get(serviceId) || 0) + 1,
         ),
       new Map<string, number>(),
     );
-    const orderedServicesSortedByNumberOfOrders = [...numberOfOrdersPerService.entries()].sort((a, b) => a[1] - b[1]);
-    
+    const orderedServicesSortedByNumberOfOrders = [
+      ...numberOfOrdersPerService.entries(),
+    ].sort((a, b) => a[1] - b[1]);
+
     return orderedServicesSortedByNumberOfOrders
       .slice(0, NUMBER_OF_BEST_SELLING_SERVICES + 1)
       .map(([serviceId, numberOfSales]) => ({ serviceId, numberOfSales }));

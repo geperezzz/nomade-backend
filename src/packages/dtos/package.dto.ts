@@ -11,9 +11,7 @@ export const packageSchema = z.object({
   description: z.string(),
   price: z.coerce.number().nonnegative().finite(),
   appliedDiscountPercentage: z.coerce.number().min(0).max(100),
-  containedServices: z.array(
-    packageServiceSchema
-  ),
+  containedServices: z.array(packageServiceSchema),
 });
 
 export class PackageDto extends createZodDto(packageSchema) {

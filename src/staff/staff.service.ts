@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   InjectTransaction,
   Transaction,
@@ -51,7 +51,9 @@ export class StaffService {
       skip: itemsPerPage * (pageIndex - 1),
       take: itemsPerPage,
     });
-    const items = await Promise.all(rawStaff.map(rawEmployee => this.rawEntityToEntity(rawEmployee)));
+    const items = await Promise.all(
+      rawStaff.map((rawEmployee) => this.rawEntityToEntity(rawEmployee)),
+    );
 
     const itemCount = await this.currentTransaction.employee.count({
       where: {
@@ -81,7 +83,7 @@ export class StaffService {
 
     return rawEmployee ? await this.rawEntityToEntity(rawEmployee) : null;
   }
-  
+
   @Transactional()
   async findOneByEmail(email: string): Promise<EmployeeEntity | null> {
     const rawEmployee = await this.currentTransaction.employee.findFirst({
@@ -133,7 +135,7 @@ export class StaffService {
     if (!removedEmployee) {
       throw new Error(`Employee not found: There is no employee with ID ${id}`);
     }
-    
+
     const { deletedAt } = await this.currentTransaction.employee.update({
       where: {
         id,
@@ -144,7 +146,7 @@ export class StaffService {
       },
       select: {
         deletedAt: true,
-      }
+      },
     });
 
     return { ...removedEmployee, deletedAt };
@@ -155,9 +157,13 @@ export class StaffService {
     rawEmployee: EmployeeRawEntity,
   ): Promise<EmployeeEntity> {
     const occupations = await Promise.all(
-      rawEmployee.occupations.map(async (occupationName) =>
-        (await this.staffOccupationsService.findOne(rawEmployee.id, occupationName))!
-      )
+      rawEmployee.occupations.map(
+        async (occupationName) =>
+          (await this.staffOccupationsService.findOne(
+            rawEmployee.id,
+            occupationName,
+          ))!,
+      ),
     );
 
     return {

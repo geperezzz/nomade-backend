@@ -8,4 +8,6 @@ export const updateStaffOccupationSchema = updateSuperAdminOccupationSchema
   .or(updateSalespersonOccupationSchema)
   .or(updateAdminOccupationSchema);
 
-export type UpdateStaffOccupationDto = z.infer<typeof updateStaffOccupationSchema>;
+export type UpdateStaffOccupationDto = z.infer<
+  typeof updateStaffOccupationSchema
+>;

@@ -23,10 +23,7 @@ import { StaffOccupationName } from 'src/staff/entities/employee.entity';
 
 @Controller('services/train-tickets')
 @ApiTags('Train tickets')
-@MustBeLoggedInAs(
-  StaffOccupationName.SUPER_ADMIN,
-  StaffOccupationName.ADMIN,
-)
+@MustBeLoggedInAs(StaffOccupationName.SUPER_ADMIN, StaffOccupationName.ADMIN)
 export class TrainTicketsController {
   constructor(private readonly trainTicketsService: TrainTicketsService) {}
 
@@ -34,32 +31,25 @@ export class TrainTicketsController {
   async create(
     @Body() createTrainTicketDto: CreateTrainTicketDto,
   ): Promise<TrainTicketDto> {
-    const createdTrainTicket = await this.trainTicketsService.create(
-      createTrainTicketDto,
-    );
+    const createdTrainTicket =
+      await this.trainTicketsService.create(createTrainTicketDto);
     return TrainTicketDto.fromEntity(createdTrainTicket);
   }
 
   @Get()
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findMany(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<Page<TrainTicketDto>> {
     const foundTrainTicketsPage =
       await this.trainTicketsService.findMany(paginationQueryDto);
-    const items = foundTrainTicketsPage.items.map(
-      TrainTicketDto.fromEntity,
-    );
+    const items = foundTrainTicketsPage.items.map(TrainTicketDto.fromEntity);
 
     return { ...foundTrainTicketsPage, items };
   }
 
   @Get(':id')
-  @MustBeLoggedInAs(
-    StaffOccupationName.SALESPERSON,
-  )
+  @MustBeLoggedInAs(StaffOccupationName.SALESPERSON)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TrainTicketDto> {

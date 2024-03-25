@@ -1,4 +1,8 @@
-import { ExecutionContext, UnauthorizedException, createParamDecorator } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  createParamDecorator,
+} from '@nestjs/common';
 
 import { EmployeeEntity } from 'src/staff/entities/employee.entity';
 
@@ -10,5 +14,5 @@ export const Employee = createParamDecorator(
     }
 
     return request.employee;
-  }
+  },
 );

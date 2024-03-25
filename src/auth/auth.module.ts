@@ -14,11 +14,17 @@ import { APP_GUARD } from '@nestjs/core';
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule.forRoot({ validate })],
-      useFactory: async (configService: ConfigService<AuthenticationConfig, true>) => ({
-        secret: configService.get('AUTHENTICATION_TOKEN_SECRET', { infer: true }),
+      useFactory: async (
+        configService: ConfigService<AuthenticationConfig, true>,
+      ) => ({
+        secret: configService.get('AUTHENTICATION_TOKEN_SECRET', {
+          infer: true,
+        }),
         signOptions: {
-          expiresIn: configService.get('AUTHENTICATION_TOKEN_EXPIRES_IN', { infer: true }),
-        },        
+          expiresIn: configService.get('AUTHENTICATION_TOKEN_EXPIRES_IN', {
+            infer: true,
+          }),
+        },
       }),
       inject: [ConfigService],
     }),
@@ -28,8 +34,8 @@ import { APP_GUARD } from '@nestjs/core';
     AuthService,
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
-    }
+      useClass: AuthGuard,
+    },
   ],
   controllers: [AuthController],
 })

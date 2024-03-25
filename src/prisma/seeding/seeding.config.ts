@@ -7,20 +7,18 @@ export const seedingConfigSchema = z.discriminatedUnion('databaseSeeding', [
     databaseSeeding: z.literal('production'),
     superAdminToSeed: z
       .string()
-      .transform(
-        (superAdminToCreate, context) => {
-          try {
-            return JSON.parse(superAdminToCreate);
-          } catch {
-            context.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: '`superAdminToSeed` must be a valid JSON object',
-              path: ['superAdminToSeed'],
-            });
-            return z.NEVER;
-          }
+      .transform((superAdminToCreate, context) => {
+        try {
+          return JSON.parse(superAdminToCreate);
+        } catch {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '`superAdminToSeed` must be a valid JSON object',
+            path: ['superAdminToSeed'],
+          });
+          return z.NEVER;
         }
-      )
+      })
       .pipe(createEmployeeSchema),
   }),
   z.object({
