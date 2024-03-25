@@ -1,6 +1,4 @@
-import { CreateOrderDto } from 'src/orders/dtos/create-order.dto';
-
-export const ordersToSeed: CreateOrderDto[] = [
+export const ordersToSeed = [
   {
     id: 'eaf0f0e9-4b12-4b61-99cd-72783b06a235',
     customerId: '1db1dc8c-297c-4b1e-a4f6-405cfa5aa34e',
@@ -79,4 +77,4 @@ export const ordersToSeed: CreateOrderDto[] = [
     ],
     placementTimestamp: new Date('2024-02-25T10:00:00-04:00'),
   },
-] as const;
+];

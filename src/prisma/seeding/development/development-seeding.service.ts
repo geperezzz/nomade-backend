@@ -28,6 +28,8 @@ import { PaymentMethodsService } from 'src/payment-methods/payment-methods.servi
 import { paymentMethodsToSeed } from './seeding-data/payment-methods-to-seed';
 import { OrdersService } from 'src/orders/orders.service';
 import { ordersToSeed } from './seeding-data/orders-to-seed';
+import { paymentsToSeed } from './seeding-data/payments-to-seed';
+import { OrderPaymentsService } from 'src/orders/payments/order-payments.service';
 
 @Injectable()
 export class DevelopmentSeedingService {
@@ -45,6 +47,7 @@ export class DevelopmentSeedingService {
     private packagesService: PackagesService,
     private paymentMethodsService: PaymentMethodsService,
     private ordersService: OrdersService,
+    private orderPaymentsService: OrderPaymentsService,
   ) {}
 
   @Transactional()
@@ -57,6 +60,7 @@ export class DevelopmentSeedingService {
     ]);
     await this.seedPackages();
     await this.seedOrders();
+    await this.seedPayments();
   }
 
   @Transactional()
@@ -185,6 +189,22 @@ export class DevelopmentSeedingService {
     await Promise.all(
       ordersToSeed.map(async order => {
         await this.ordersService.create(order);
+      })
+    )
+  }
+
+  @Transactional()
+  private async seedPayments(): Promise<void> {
+    await Promise.all(
+      paymentsToSeed.map(async ({ orderId, ...payment }) => {
+        const orderToBePaid = (await this.ordersService.findOne(orderId))!;
+        await this.orderPaymentsService.create(
+          orderId,
+          {
+            ...payment,
+            netAmountPaid: orderToBePaid.price.toNumber(),
+          }
+        );
       })
     )
   }

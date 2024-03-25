@@ -14,6 +14,7 @@ import { TrainTicketsModule } from 'src/services/train-tickets/train-tickets.mod
 import { PackagesModule } from 'src/packages/packages.module';
 import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
 import { OrdersModule } from 'src/orders/orders.module';
+import { OrderPaymentsModule } from 'src/orders/payments/order-payments.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { OrdersModule } from 'src/orders/orders.module';
     PackagesModule,
     PaymentMethodsModule,
     OrdersModule,
+    OrderPaymentsModule,
   ],
   providers: [DevelopmentSeedingService],
   exports: [DevelopmentSeedingService],
