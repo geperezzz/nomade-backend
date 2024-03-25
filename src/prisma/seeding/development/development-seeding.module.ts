@@ -13,6 +13,7 @@ import { ToursModule } from 'src/services/tours/tours.module';
 import { TrainTicketsModule } from 'src/services/train-tickets/train-tickets.module';
 import { PackagesModule } from 'src/packages/packages.module';
 import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PaymentMethodsModule } from 'src/payment-methods/payment-methods.module
     TrainTicketsModule,
     PackagesModule,
     PaymentMethodsModule,
+    OrdersModule,
   ],
   providers: [DevelopmentSeedingService],
   exports: [DevelopmentSeedingService],

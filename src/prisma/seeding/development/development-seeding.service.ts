@@ -26,6 +26,8 @@ import { PackagesService } from 'src/packages/packages.service';
 import { packagesToSeed } from './seeding-data/packages-to-seed';
 import { PaymentMethodsService } from 'src/payment-methods/payment-methods.service';
 import { paymentMethodsToSeed } from './seeding-data/payment-methods-to-seed';
+import { OrdersService } from 'src/orders/orders.service';
+import { ordersToSeed } from './seeding-data/orders-to-seed';
 
 @Injectable()
 export class DevelopmentSeedingService {
@@ -42,6 +44,7 @@ export class DevelopmentSeedingService {
     private trainTicketsService: TrainTicketsService,
     private packagesService: PackagesService,
     private paymentMethodsService: PaymentMethodsService,
+    private ordersService: OrdersService,
   ) {}
 
   @Transactional()
@@ -53,6 +56,7 @@ export class DevelopmentSeedingService {
       this.seedPaymentMethods(),
     ]);
     await this.seedPackages();
+    await this.seedOrders();
   }
 
   @Transactional()
@@ -99,7 +103,7 @@ export class DevelopmentSeedingService {
   private async seedAirlineTickets(): Promise<void> {
     await Promise.all(
       airlineTicketsToSeed.map(async airlineTicket => {
-        await this.airlineTicketsService.create(airlineTicket)
+        await this.airlineTicketsService.create(airlineTicket);
       })
     );
   }
@@ -108,7 +112,7 @@ export class DevelopmentSeedingService {
   private async seedBusTickets(): Promise<void> {
     await Promise.all(
       busTicketsToSeed.map(async busTicket => {
-        await this.busTicketsService.create(busTicket)
+        await this.busTicketsService.create(busTicket);
       })
     );
   }
@@ -117,7 +121,7 @@ export class DevelopmentSeedingService {
   private async seedCarRentals(): Promise<void> {
     await Promise.all(
       carRentalsToSeed.map(async carRental => {
-        await this.carRentalsService.create(carRental)
+        await this.carRentalsService.create(carRental);
       })
     );
   }
@@ -126,7 +130,7 @@ export class DevelopmentSeedingService {
   private async seedEvents(): Promise<void> {
     await Promise.all(
       eventsToSeed.map(async event => {
-        await this.eventsService.create(event)
+        await this.eventsService.create(event);
       })
     );
   }
@@ -135,7 +139,7 @@ export class DevelopmentSeedingService {
   private async seedHotelsPerNight(): Promise<void> {
     await Promise.all(
       hotelsPerNightToSeed.map(async hotelPerNight => {
-        await this.hotelsPerNightService.create(hotelPerNight)
+        await this.hotelsPerNightService.create(hotelPerNight);
       })
     );
   }
@@ -144,7 +148,7 @@ export class DevelopmentSeedingService {
   private async seedTours(): Promise<void> {
     await Promise.all(
       toursToSeed.map(async tour => {
-        await this.toursService.create(tour)
+        await this.toursService.create(tour);
       })
     );
   }
@@ -153,7 +157,7 @@ export class DevelopmentSeedingService {
   private async seedTrainTickets(): Promise<void> {
     await Promise.all(
       trainTicketsToSeed.map(async trainTicket => {
-        await this.trainTicketsService.create(trainTicket)
+        await this.trainTicketsService.create(trainTicket);
       })
     );
   }
@@ -162,7 +166,7 @@ export class DevelopmentSeedingService {
   private async seedPackages(): Promise<void> {
     await Promise.all(
       packagesToSeed.map(async packageToSeed => {
-        await this.packagesService.create(packageToSeed)
+        await this.packagesService.create(packageToSeed);
       })
     );
   }
@@ -171,8 +175,17 @@ export class DevelopmentSeedingService {
   private async seedPaymentMethods(): Promise<void> {
     await Promise.all(
       paymentMethodsToSeed.map(async paymentMethod => {
-        await this.paymentMethodsService.create(paymentMethod)
+        await this.paymentMethodsService.create(paymentMethod);
       })
     );
+  }
+
+  @Transactional()
+  private async seedOrders(): Promise<void> {
+    await Promise.all(
+      ordersToSeed.map(async order => {
+        await this.ordersService.create(order);
+      })
+    )
   }
 }
