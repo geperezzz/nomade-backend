@@ -247,6 +247,10 @@ export class OrdersService {
         netAmountPaid: true,
       },
     });
-    return order.price === aggregations._sum.netAmountPaid;
+
+    if (!aggregations._sum.netAmountPaid) {
+      return false;
+    }
+    return order.price.equals(aggregations._sum.netAmountPaid);
   }
 }
